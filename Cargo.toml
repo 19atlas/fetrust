@@ -1,0 +1,9 @@
+[package]
+name = "ferust"
+version = "0.1.1"
+edition = "2021"
+description = "btw fetchtool in rust"
+categories = ["os","fetching","system","device"]
+license = "UNLICENSE"
+
+[dependencies]
