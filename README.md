@@ -1,11 +1,16 @@
 # ferust (btw rusta yazdım)
-minimal sade ekstra kütüphane kullanmadan yazdığım cihazdan bilgi getiren araç
+minimal hızlı ve ekstra kütüphane kullanmadan yazdığım cihazın bilgisini getiren araç
 
-## Yükelemek için: `cargo build --release && cd target/release && chmod +x ferust && sudo mv ferust /usr/local/bin`
-
-iyi kullanmalar
+## Yükelemek için: 
+- `cargo build --release && cd target/release && chmod +x ferust && sudo mv ferust /usr/local/bin`
 
 ### yapılması gerekenler:
-- [ ] config desteği
-- [ ] .config klasorune otomatik config dosyasını ekleme
-- [ ] bloatlamadan daha fazla işlevlik
+- [ ] Config desteği
+- [ ] Config klasorune otomatik config dosyasını ekleme
+- [ ] Bloatlamadan daha fazla işlevlik daha fazla özellestirme
+- [ ] Cihazdan daha fazla bilgi alma
+- [ ] Dağıtıma göre ASCII yazırma
+- [ ] Ram anlık kullanımı
+- [X] Destek
+
+iyi kullanmalar
