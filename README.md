@@ -7,7 +7,7 @@ minimal hızlı ve ekstra kütüphane kullanmadan yazdığım cihazın bilgisini
 ### yapılması gerekenler:
 - [ ] Config desteği
 - [ ] Config klasorune otomatik config dosyasını ekleme
-- [ ] Bloatlamadan daha fazla işlevlik daha fazla özellestirme
+- [ ] Bloatlamadan ve kütüphane kullanmadan fazla işlevlik daha fazla özellestirme getirmek
 - [ ] Cihazdan daha fazla bilgi alma
 - [ ] Dağıtıma göre ASCII yazırma
 - [ ] Ram anlık kullanımı
