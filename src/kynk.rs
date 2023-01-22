@@ -22,15 +22,13 @@ pub mod sys {
 
     pub fn get_os() -> String {
         #[cfg(target_os = "windows")]
-        return "Windows".to_string();
+        return "Windows NT".to_string();
         #[cfg(target_os = "macos")]
-        return "macOS".to_string();
-        #[cfg(target_os = "ios")]
-        return "iOS".to_string();
+        return "XNU/darwin".to_string();
         #[cfg(target_os = "linux")]
         return get_linux_distro("/etc/os-release");
         #[cfg(target_os = "android")]
-        return "Android".to_string();
+        return get_linux_distro("/etc/os-release");
         #[cfg(target_os = "freebsd")]
         return "FreeBSD".to_string();
         #[cfg(target_os = "dragonfly")]
@@ -39,8 +37,6 @@ pub mod sys {
         return "OpenBSD".to_string();
         #[cfg(target_os = "netbsd")]
         return "NetBSD".to_string();
-        #[cfg(target = "unix")]
-        return "Unix".to_string();
     }
 
     pub fn get_linux_distro(file: &str) -> String {
@@ -111,28 +107,31 @@ pub mod sys {
         })
         .unwrap()
     }
-
     pub fn get_hostname() -> String {
-        std::env::var(if cfg!(target_os = "linux") {
+        let hostname_var = if cfg!(target_os = "linux") {
             "HOSTNAME"
         } else {
             "COMPUTERNAME"
-        })
-        .unwrap()
+        };
+        std::env::var(hostname_var).unwrap_or("hostname".to_string())
     }
+    
+    
+    
 
     pub fn get_shell() -> String {
-        #[cfg(target_os = "linux")]
-        use std::env;
-        let shell_var = "SHELL";
-        match env::var(shell_var) {
-            Ok(mut val) => {
-                val = val.replace("/", " ");
-                val.split(" ").last().unwrap().to_string()
-            }
-            Err(_) => "Bilinmeyen".to_string(), 
+        use std::env::var;
+        let shell_var = if cfg!(target_os = "linux") {
+            "SHELL"
+        } else {
+            "COMSPEC"
+        };
+        match var(shell_var) {
+            Ok(val) => val,
+            Err(_) => "Unknown".to_string(),
         }
     }
+    
 
     pub fn get_syszaman() -> String {
         //`uptime -p` command.
@@ -151,7 +150,7 @@ pub mod sys {
                     .replace("up ", "");
                 time
             }
-            Err(_) => "Unknown".to_string(),
+            Err(_) => "saat yok".to_string(),
         };
     
         let up_time = up_time.replace("\n", ""); // Remove any newline character
@@ -159,19 +158,5 @@ pub mod sys {
         up_time
     }
     
-
-    pub fn is_unix_like() -> bool {
-        return if cfg!(target_os = "linux")
-            || cfg!(target_os = "freebsd")
-            || cfg!(target_os = "openbsd")
-            || cfg!(target_os = "macos")
-            || cfg!(target_os = "ios")
-            || cfg!(target_os = "dragonfly")
-            || cfg!(target_os = "netbsd")
-        {
-            true
-        } else {
-            false
-        };
-    }
 }
+    
