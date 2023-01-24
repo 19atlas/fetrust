@@ -1,7 +1,6 @@
 use std::env::consts;
 pub mod ekhizmet;
 pub mod kynk;
-
 fn main() {
 
     let infos = crate::kynk::sys::init();

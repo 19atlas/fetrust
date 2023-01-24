@@ -41,10 +41,9 @@ pub mod sys {
     }
     pub fn get_release() -> String {
         let release_d = std::process::Command::new("lsb_release").arg("-sr").output().expect("release");
-        let version = String::from_utf8(release_d.stdout).expect("Invalid UTF-8").replace("\n", ""); // gereksiz \n leri siler
+        let version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", ""); // gereksiz \n leri siler
         version
     }
-
     pub fn get_linux_distro(file: &str) -> String {
         if std::path::Path::new(file).exists() {
             if let Ok(lines) = crate::ekhizmet::yardimlar::read_lines(file) {
@@ -61,7 +60,6 @@ pub mod sys {
         }
         "GNU/Linux".to_string()
     }
-
     pub fn get_kernel() -> String {
         #[cfg(target_os = "windows")]
         return "NT".to_string();
@@ -97,7 +95,7 @@ pub mod sys {
                     .chars()
                     .rev()
                     .collect();
-
+                    
                 rev_kernel_ver
             }
             Err(_) => "Bilinmeyen".to_string(),
@@ -155,6 +153,4 @@ pub mod sys {
     
         up_time
     }
-    
 }
-    
