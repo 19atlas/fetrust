@@ -1,5 +1,4 @@
 use std::env::consts;
-
 pub mod ekhizmet;
 pub mod kynk;
 
@@ -11,7 +10,7 @@ fn main() {
     let cputab: &str = consts::ARCH;
 
     println!(
-        "    {}@{}\n--------------------\nOS ==> {}\nKernel ==> {} {}\nShell ==> {}\nAile ==> {}\nUptime ==> {}\nCPU ==> {} tabanli",
-        infos.username, infos.hostname, infos.os_name, kern, infos.kernel, infos.shell, aile, infos.uptime, cputab
+        "       \x1b[1m{}@{}\n\x1b[4m                            \x1b[0m\nOS ==> {} {}\nKernel ==> \x1b[33m{} {}\x1b[37m\nShell ==> \x1b[32m{}\x1b[37m\nAile ==> \x1b[35m{}\x1b[37m\nUptime ==> \x1b[36m{}\x1b[37m\nCPU ==> {} tabanli",
+        infos.username, infos.hostname, infos.os_name, infos.os_rel, kern,infos.kernel , infos.shell, aile, infos.uptime, cputab
     );
 }

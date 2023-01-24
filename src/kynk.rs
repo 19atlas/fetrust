@@ -1,5 +1,6 @@
 pub struct SystemInfos {
     pub os_name: String,
+    pub os_rel: String,
     pub kernel: String,
     pub username: String,
     pub hostname: String,
@@ -8,10 +9,10 @@ pub struct SystemInfos {
 }
 pub mod sys {
     use crate::kynk::SystemInfos;
-    use std::process::Command;
     pub fn init() -> SystemInfos {
         SystemInfos {
             os_name: get_os(),
+            os_rel: get_release(),
             kernel: get_kernel(),
             username: get_username(),
             hostname: get_hostname(),
@@ -37,6 +38,11 @@ pub mod sys {
         return "OpenBSD".to_string();
         #[cfg(target_os = "netbsd")]
         return "NetBSD".to_string();
+    }
+    pub fn get_release() -> String {
+        let release_d = std::process::Command::new("lsb_release").arg("-sr").output().expect("release");
+        let version = String::from_utf8(release_d.stdout).expect("Invalid UTF-8").replace("\n", ""); // gereksiz \n leri siler
+        version
     }
 
     pub fn get_linux_distro(file: &str) -> String {
@@ -79,13 +85,13 @@ pub mod sys {
     }
 
     pub fn get_kernel_version() -> String {
-        let krl_vr = Command::new("uname").arg("-r").output();
+        let krl_vr = std::process::Command::new("uname").arg("-r").output();
         let krl_vr = match krl_vr {
             Ok(x) => {
                 let rev_kernel_ver: String =
                     String::from_utf8(x.stdout).unwrap().chars().rev().collect();
                 let rev_kernel_ver = rev_kernel_ver
-                    .split("-")
+                    .split("\n")
                     .last()
                     .unwrap()
                     .chars()
@@ -115,10 +121,6 @@ pub mod sys {
         };
         std::env::var(hostname_var).unwrap_or("hostname".to_string())
     }
-    
-    
-    
-
     pub fn get_shell() -> String {
         use std::env::var;
         let shell_var = if cfg!(target_os = "linux") {
@@ -131,12 +133,9 @@ pub mod sys {
             Err(_) => "Unknown".to_string(),
         }
     }
-    
-
     pub fn get_syszaman() -> String {
-        //`uptime -p` command.
-        let up_time = Command::new("uptime").arg("-p").output();
-    
+        //`uptime -p` komutu
+        let up_time = std::process::Command::new("uptime").arg("-p").output();
         let up_time = match up_time {
             Ok(x) => {
                 let time = String::from_utf8(x.stdout)
@@ -150,10 +149,9 @@ pub mod sys {
                     .replace("up ", "");
                 time
             }
-            Err(_) => "saat yok".to_string(),
+            Err(_) => "veri alinamadi".to_string(),
         };
-    
-        let up_time = up_time.replace("\n", ""); // Remove any newline character
+        let up_time = up_time.replace("\n", ""); // gereksiz \n leri siler
     
         up_time
     }
