@@ -1,16 +1,19 @@
-# ferust (btw rusta yazdım)
-minimal hızlı ve ekstra kütüphane kullanmadan yazdığım cihazın bilgisini getiren araç
+# fetrust
+a minimal and fast system info program
 
-## Yükelemek için: 
-- `cargo build --release && cd target/release && chmod +x ferust && sudo mv ferust /usr/local/bin`
+## For downloading: 
+```
+cargo build --release && \
+sudo mv ./target/release/fetrust /usr/local/bin #replace sudo with doas if you don't have sudo.
+```
 
-### yapılması gerekenler:
-- [ ] Config desteği (daha fazla veya daha minimal hale getirmek için)
-- [ ] Config klasörüne otomatik config dosyasını oluşturma
-- [ ] Bloatlamadan ve kütüphane kullanmadan fazla işlevlik daha fazla özellestirme getirmek
-- [ ] Cihazdan daha fazla bilgi alma
-- [ ] Dağıtıma göre ASCII yazırma
-- [ ] Ram anlık kullanımı
-- [X] Destek
+### TODO List:
+- [V] Config support
+- [V] Automatic creating config folder/files
+- [X] Making it works without any library and bloat blobs 
+- [ ] Getting more information from device
+- [V] Writing ASCII art depends on distro
+- [ ] Getting ram usage
+<!-- "- [V] Support" wth is that, bruh creyde.sh -->
 
-iyi kullanmalar
+Thanks.
