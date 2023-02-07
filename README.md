@@ -8,12 +8,12 @@ sudo mv ./target/release/fetrust /usr/local/bin #replace sudo with doas if you d
 ```
 
 ### TODO List:
-- [V] Config support
-- [V] Automatic creating config folder/files
-- [X] Making it works without any library and bloat blobs 
+- [X] Config support
+- [X] Automatic creating config folder/files
+- [ ] Making it works without any library and bloat blobs (failed) 
 - [ ] Getting more information from device
-- [V] Writing ASCII art depends on distro
+- [X] Writing ASCII art depends on distro
 - [ ] Getting ram usage
-<!-- "- [V] Support" wth is that, bruh creyde.sh -->
+<!-- "- [X] Support" wth is that, bruh creyde.sh -->
 
 Thanks.
