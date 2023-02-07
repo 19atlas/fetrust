@@ -118,12 +118,16 @@ pub mod sys {
 		.unwrap()
 	}
 	pub fn get_hostname() -> String {
-		let hostname_var = if cfg!(target_os = "linux") {
-			"HOSTNAME"
-		} else {
-			"COMPUTERNAME"
-		};
-		std::env::var(hostname_var).unwrap_or("hostname".to_string())
+		// get $HOSTNAME with old way
+		//let hostname_var = if cfg!(target_os = "linux") {
+		//	"HOSTNAME"
+		//} else {
+		//	"COMPUTERNAME"
+		//};
+		//std::env::var(hostname_var).unwrap_or("hostname".to_string())
+		use std::fs;
+        	let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
+        	hostname_str
 	}
 	pub fn get_shell() -> String {
 		use std::env::var;
