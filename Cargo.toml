@@ -1,9 +1,14 @@
 [package]
-name = "ferust"
+name = "fetrust"
 version = "0.1.1"
 edition = "2021"
-description = "btw fetchtool in rust"
+description = "fetchtool in rust"
 categories = ["os","fetching","system","device"]
-license = "UNLICENSE"
+license = "GPL-3.0"
 
 [dependencies]
+figlet-rs = "0.1.4"
+ansi_term = "0.12.1"
+tinyrand = "0.5"
+tinyrand-std = "0.5"
+another_json_minimal = "0.0.2"

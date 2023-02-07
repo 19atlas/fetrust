@@ -1,0 +1,11 @@
+{
+	"banner":			[["os"], "rand"],
+	"user_a_host_name":	[["          ","username","@","hostname","          "], "yellow"],
+	"brace":			[["____________________________________"], null],
+	"os":				[["os	==> ","os"," ","release"], null],
+	"kernel":			[["Kernel	==> ","kernel_name"," ","kernel"], "green"],
+	"shell":			[["Shell	==> ","shell"], "purple"],
+	"family":			[["Family	==> ","family"], "cyan"],
+	"uptime":			[["Uptime	==> ","uptime"], null],
+	"cpu_type":			[["CPUt	==> ","cpu_type"], null]
+}
