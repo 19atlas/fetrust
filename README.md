@@ -3,8 +3,7 @@ a minimal and fast system info program
 
 ## For downloading: 
 ```
-cargo build --release && \
-sudo mv ./target/release/fetrust /usr/local/bin #replace sudo with doas if you don't have sudo.
+make build && sudo make install
 ```
 
 ### TODO List:
@@ -15,5 +14,10 @@ sudo mv ./target/release/fetrust /usr/local/bin #replace sudo with doas if you d
 - [X] Writing ASCII art depends on distro
 - [ ] Getting ram usage
 <!-- "- [X] Support" wth is that, bruh creyde.sh -->
+
+## For delete:
+```
+sudo make uninstall
+```
 
 Thanks.
