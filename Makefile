@@ -6,13 +6,13 @@ build:
 
 install:
 	@if [[ $(shell id -u) -eq 0 ]]; then\
-	    mv ./target/release/fetrust /usr/local/bin;\
+		mv ./target/release/fetrust /usr/local/bin;\
 	else\
-	    echo pls run under sudo or doas;\
+		echo pls run under sudo or doas;\
 	fi
 uninstall:
 	@if [[ $(shell id -u) -eq 0 ]]; then\
-            rm -v /usr/local/bin/fetrust;\
-        else\
-            echo bro please run me under sudo or doas;\
-        fi
+			rm -v /usr/local/bin/fetrust;\
+		else\
+			echo bro please run me under sudo or doas;\
+		fi

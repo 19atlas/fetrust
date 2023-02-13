@@ -1,4 +1,3 @@
-pub mod reading;
 pub mod resource;
 
 use std::path::Path;
