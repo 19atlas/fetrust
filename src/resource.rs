@@ -10,6 +10,7 @@ pub struct SystemInfos {
 	pub uptime: String,
 	pub cpu_type: String
 }
+
 pub mod sys {
 	use crate::resource::SystemInfos;
 	pub fn init() -> SystemInfos {
@@ -45,28 +46,29 @@ pub mod sys {
 		#[cfg(target_os = "netbsd")]
 		return "NetBSD".to_string();
 	}
-	pub fn get_release() -> String {
+	
+    pub fn get_release() -> String {
 		let release_d = std::process::Command::new("lsb_release").arg("-sr").output().expect("release");
 		let version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
 		version
 	}
-	pub fn get_linux_distro(file: &str) -> String {
-		if std::path::Path::new(file).exists() {
-			if let Ok(lines) = crate::reading::read::read_lines(file) {
-				for line in lines {
-					if let Ok(ip) = line {
-						if ip.starts_with('P') {
-							if ip.contains("PRETTY_NAME=\"") {
-								return ip.replace("PRETTY_NAME=", "").replace("\"", "");
-							}
-						}
-					}
-				}
-			}
-		}
-		"GNU/Linux".to_string()
+	
+    pub fn get_linux_distro(file: &str) -> String {
+		use std::fs;
+        let os_release = fs::read_to_string(file).unwrap();
+        let os_release: Vec<&str> = os_release.split("\n").collect();
+        let mut linux_distro = "GNU/Linux".to_string();
+        for line in 0..os_release.len() {
+            let readed_line = os_release[line].to_string();
+            if readed_line.starts_with("PRETTY_NAME=\"") {
+                linux_distro = readed_line.replace("PRETTY_NAME=", "").replace("\"", "");
+                break
+             }
+        }
+        linux_distro
 	}
-	pub fn get_kernel() -> String {
+	
+    pub fn get_kernel() -> String {
 		#[cfg(target_os = "windows")]
 		return "NT".to_string();
 		#[cfg(target_os = "macos")]
@@ -85,7 +87,6 @@ pub mod sys {
 		#[cfg(target = "unix")]
 		return "Unix".to_string();
 		#[cfg(target_os = "linux")] return get_kernel_version();
-	
 	}
 
 	pub fn get_kernel_version() -> String {
@@ -104,7 +105,7 @@ pub mod sys {
 					
 				rev_kernel_ver
 			}
-			Err(_) => "Bilinmeyen".to_string(),
+			Err(_) => "Unknown".to_string(),
 		};
 		krl_vr
 	}
@@ -118,17 +119,18 @@ pub mod sys {
 		.unwrap()
 	}
 	pub fn get_hostname() -> String {
-		// get $HOSTNAME with old way
-		//let hostname_var = if cfg!(target_os = "linux") {
-		//	"HOSTNAME"
-		//} else {
-		//	"COMPUTERNAME"
-		//};
-		//std::env::var(hostname_var).unwrap_or("hostname".to_string())
+		/* get $HOSTNAME with old way
+		let hostname_var = if cfg!(target_os = "linux") {
+			"HOSTNAME"
+		} else {
+			"COMPUTERNAME"
+		};
+		std::env::var(hostname_var).unwrap_or("hostname".to_string())*/
 		use std::fs;
-        	let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
-        	hostname_str
+        let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
+        hostname_str
 	}
+
 	pub fn get_shell() -> String {
 		use std::env::var;
 		let shell_var = if cfg!(target_os = "linux") {
@@ -136,12 +138,14 @@ pub mod sys {
 		} else {
 			"COMSPEC"
 		};
-		match var(shell_var) {
+		
+        match var(shell_var) {
 			Ok(val) => val,
 			Err(_) => "Unknown".to_string(),
 		}
 	}
-	pub fn get_uptime() -> String {
+	
+    pub fn get_uptime() -> String {
 		//`uptime -p` komutu
 		let up_time = std::process::Command::new("uptime").arg("-p").output();
 		let up_time = match up_time {
@@ -157,7 +161,7 @@ pub mod sys {
 					.replace("up ", "")*/;
 				time
 			}
-			Err(_) => "veri alinamadi".to_string(),
+			Err(_) => "Can't get data.".to_string(),
 		};
 		let up_time = up_time.replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
 	
@@ -173,6 +177,7 @@ pub mod sys {
 		let family: String = String::from(std::env::consts::FAMILY);
 		return family;
 	}
+
 	pub fn get_cput() -> String {
 		let cput: String = String::from(std::env::consts::ARCH);
 		return cput;
