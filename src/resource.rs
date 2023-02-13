@@ -47,28 +47,28 @@ pub mod sys {
 		return "NetBSD".to_string();
 	}
 	
-    pub fn get_release() -> String {
+	pub fn get_release() -> String {
 		let release_d = std::process::Command::new("lsb_release").arg("-sr").output().expect("release");
 		let version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
 		version
 	}
 	
-    pub fn get_linux_distro(file: &str) -> String {
+	pub fn get_linux_distro(file: &str) -> String {
 		use std::fs;
-        let os_release = fs::read_to_string(file).unwrap();
-        let os_release: Vec<&str> = os_release.split("\n").collect();
-        let mut linux_distro = "GNU/Linux".to_string();
-        for line in 0..os_release.len() {
-            let readed_line = os_release[line].to_string();
-            if readed_line.starts_with("PRETTY_NAME=\"") {
-                linux_distro = readed_line.replace("PRETTY_NAME=", "").replace("\"", "");
-                break
-             }
-        }
-        linux_distro
+		let os_release = fs::read_to_string(file).unwrap();
+		let os_release: Vec<&str> = os_release.split("\n").collect();
+		let mut linux_distro = "GNU/Linux".to_string();
+		for line in 0..os_release.len() {
+			let readed_line = os_release[line].to_string();
+			if readed_line.starts_with("PRETTY_NAME=\"") {
+				linux_distro = readed_line.replace("PRETTY_NAME=", "").replace("\"", "");
+				break
+			 }
+		}
+		linux_distro
 	}
 	
-    pub fn get_kernel() -> String {
+	pub fn get_kernel() -> String {
 		#[cfg(target_os = "windows")]
 		return "NT".to_string();
 		#[cfg(target_os = "macos")]
@@ -127,8 +127,8 @@ pub mod sys {
 		};
 		std::env::var(hostname_var).unwrap_or("hostname".to_string())*/
 		use std::fs;
-        let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
-        hostname_str
+		let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
+		hostname_str
 	}
 
 	pub fn get_shell() -> String {
@@ -139,13 +139,13 @@ pub mod sys {
 			"COMSPEC"
 		};
 		
-        match var(shell_var) {
+		match var(shell_var) {
 			Ok(val) => val,
 			Err(_) => "Unknown".to_string(),
 		}
 	}
 	
-    pub fn get_uptime() -> String {
+	pub fn get_uptime() -> String {
 		//`uptime -p` komutu
 		let up_time = std::process::Command::new("uptime").arg("-p").output();
 		let up_time = match up_time {
