@@ -1,0 +1,45 @@
+diff '--color=auto' -Naur ../src/resource.rs src/resource.rs
+--- ../src/resource.rs	2023-03-15 17:53:20.243904796 +0300
++++ src/resource.rs	2023-03-17 04:35:37.404502138 +0300
+@@ -44,9 +44,12 @@
+ 	}
+ 	
+ 	pub fn get_release() -> String {
+-		let release_d = std::process::Command::new("lsb_release").arg("-sr").output().expect("release");
+-		let version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
+-		version
++        let mut version = "unknown release".to_string();
++        match std::process::Command::new("lsb_release").arg("-sr").output() {
++		    Ok(release_d) => {version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", "");} // gereksiz \n leri siler //turkish moment from creyde.sh
++            _ => {}
++        }
++        version
+ 	}
+ 	
+ 	pub fn get_unix_distro(file: &str) -> String {
+@@ -110,7 +113,7 @@
+ 	}
+ 
+ 	pub fn get_username() -> String {
+-		std::env::var(if cfg!(target_os = "linux") {
++		std::env::var(if cfg!(any(target_os = "linux", target_os = "freebsd")) {
+ 			"USER"
+ 		} else {
+ 			"USERNAME"
+@@ -126,7 +129,15 @@
+ 		};
+ 		std::env::var(hostname_var).unwrap_or("hostname".to_string())*/
+ 		use std::fs;
+-		let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
++		let mut hostname_str = "unknown hostname".to_string();
++        match fs::read_to_string("/etc/hostname") {
++            Ok(file) => {hostname_str = file;}
++            _ => {
++                if cfg!(target_os = "freebsd") {
++                    hostname_str = std::env::var("HOST").unwrap();
++                }
++            }
++        }
+ 		hostname_str
+ 	}
+ 
