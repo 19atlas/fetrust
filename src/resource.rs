@@ -158,23 +158,19 @@ pub mod sys {
 	}
 	
 	pub fn get_uptime() -> String {
-		//`uptime -p` komutu
-		let up_time = std::process::Command::new("uptime").arg("-p").output();
-		let up_time = match up_time {
+		/*let up_time = match up_time {
 			Ok(x) => {
 				let time = String::from_utf8(x.stdout)
 					.unwrap()
-					/*.replace("hours", "saat")
-					.replace("hour", "saat")
-					.replace("minutes", "dakkikadir")
-					.replace("minute", "dakkikadir") //turkish moment from creyde.sh
-					.replace("days", "gün")
-					.replace("day", "gün")
+					/*.replace("hour(s)", "saat")
+					.replace("minute(s)", "dakkikadir") //turkish moment from creyde.sh
+					.replace("day(s)", "gün")
 					.replace("up ", "")*/;
 				time
 			}
 			Err(_) => "Can't get data.".to_string(),
-		};
+		};*/
+	    let up_time = cuptime_parser::command_uptime_parser();
 		let up_time = up_time.replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
 	
 		up_time

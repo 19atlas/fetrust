@@ -18,11 +18,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "cuptime_parser"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d29c225fe7767ae876b15742b7ed9ea0ac39abb8f9c3a296f62292caa7c61a6a"
+
+[[package]]
 name = "fetrust"
 version = "0.1.1"
 dependencies = [
  "another_json_minimal",
  "ansi_term",
+ "cuptime_parser",
  "figlet-rs",
  "tinyrand",
  "tinyrand-std",
