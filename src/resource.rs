@@ -77,10 +77,8 @@ pub mod sys {
 		return "XNU".to_string();
 		#[cfg(target_os = "ios")]
 		return "XNU".to_string();
-		#[cfg(target_os = "android")]
+		#[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
 		return get_kernel_version();
-		#[cfg(target_os = "freebsd")]
-		return "BSD".to_string();
 		#[cfg(target_os = "dragonfly")]
 		return "BSD".to_string();
 		#[cfg(target_os = "openbsd")]
@@ -89,8 +87,6 @@ pub mod sys {
 		return "BSD".to_string();
 		#[cfg(target = "unix")]
 		return "Unix".to_string();
-		#[cfg(target_os = "linux")]
-		return get_kernel_version();
 	}
 
 	pub fn get_kernel_version() -> String {
@@ -145,15 +141,20 @@ pub mod sys {
 
 	pub fn get_shell() -> String {
 		use std::env::var;
-		let shell_var = if cfg!(target_os = "linux") {
+		let shell_var = if cfg!(target_os = "linux") || cfg!(target_os = "freebsd") {
 			"SHELL"
 		} else {
 			"COMSPEC"
 		};
-		
+
 		match var(shell_var) {
-			Ok(val) => val,
-			Err(_) => "Unknown".to_string(),
+            Ok(val) => {
+		        #[cfg(target_os = "freebsd")]
+                let val = val.split('/').collect::<Vec<&str>>().pop().unwrap().to_string();
+			    //or
+                val
+            },
+			_ => "Unknown".to_string(),
 		}
 	}
 	
