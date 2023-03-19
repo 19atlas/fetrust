@@ -33,12 +33,8 @@ pub mod sys {
 		return "Windows NT".to_string();
 		#[cfg(target_os = "macos")]
 		return "XNU/darwin".to_string();
-		#[cfg(target_os = "linux")]
-		return get_linux_distro("/etc/os-release");
-		#[cfg(target_os = "android")]
-		return get_linux_distro("/etc/os-release");
-		#[cfg(target_os = "freebsd")]
-		return "FreeBSD".to_string();
+		#[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
+		return get_unix_distro("/etc/os-release");
 		#[cfg(target_os = "dragonfly")]
 		return "DragonflyBSD".to_string();
 		#[cfg(target_os = "openbsd")]
@@ -48,16 +44,22 @@ pub mod sys {
 	}
 	
 	pub fn get_release() -> String {
-		let release_d = std::process::Command::new("lsb_release").arg("-sr").output().expect("release");
-		let version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
-		version
+        let mut version = "unknown release".to_string();
+        match std::process::Command::new("lsb_release").arg("-sr").output() {
+		    Ok(release_d) => {version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", "");} // gereksiz \n leri siler //turkish moment from creyde.sh
+            _ => {}
+        }
+        version
 	}
 	
-	pub fn get_linux_distro(file: &str) -> String {
+	pub fn get_unix_distro(file: &str) -> String {
 		use std::fs;
 		let os_release = fs::read_to_string(file).unwrap();
 		let os_release: Vec<&str> = os_release.split("\n").collect();
+		#[cfg(any(target_os = "linux", target_os = "android"))]
 		let mut linux_distro = "GNU/Linux".to_string();
+        #[cfg(target_os = "freebsd")]
+		let mut linux_distro = "BSD".to_string();
 		for line in 0..os_release.len() {
 			let readed_line = os_release[line].to_string();
 			if readed_line.starts_with("PRETTY_NAME=\"") {
@@ -75,9 +77,8 @@ pub mod sys {
 		return "XNU".to_string();
 		#[cfg(target_os = "ios")]
 		return "XNU".to_string();
-		#[cfg(target_os = "android")] return get_kernel_version();
-		#[cfg(target_os = "freebsd")]
-		return "BSD".to_string();
+		#[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
+		return get_kernel_version();
 		#[cfg(target_os = "dragonfly")]
 		return "BSD".to_string();
 		#[cfg(target_os = "openbsd")]
@@ -86,7 +87,6 @@ pub mod sys {
 		return "BSD".to_string();
 		#[cfg(target = "unix")]
 		return "Unix".to_string();
-		#[cfg(target_os = "linux")] return get_kernel_version();
 	}
 
 	pub fn get_kernel_version() -> String {
@@ -111,7 +111,7 @@ pub mod sys {
 	}
 
 	pub fn get_username() -> String {
-		std::env::var(if cfg!(target_os = "linux") {
+		std::env::var(if cfg!(any(target_os = "linux", target_os = "freebsd")) {
 			"USER"
 		} else {
 			"USERNAME"
@@ -127,42 +127,51 @@ pub mod sys {
 		};
 		std::env::var(hostname_var).unwrap_or("hostname".to_string())*/
 		use std::fs;
-		let hostname_str = fs::read_to_string("/etc/hostname").expect("hostname");
+		let mut hostname_str = "unknown hostname".to_string();
+        match fs::read_to_string("/etc/hostname") {
+            Ok(file) => {hostname_str = file;}
+            _ => {
+                if cfg!(target_os = "freebsd") {
+                    hostname_str = std::env::var("HOST").unwrap();
+                }
+            }
+        }
 		hostname_str
 	}
 
 	pub fn get_shell() -> String {
 		use std::env::var;
-		let shell_var = if cfg!(target_os = "linux") {
+		let shell_var = if cfg!(target_os = "linux") || cfg!(target_os = "freebsd") {
 			"SHELL"
 		} else {
 			"COMSPEC"
 		};
-		
+
 		match var(shell_var) {
-			Ok(val) => val,
-			Err(_) => "Unknown".to_string(),
+            Ok(val) => {
+		        #[cfg(target_os = "freebsd")]
+                let val = val.split('/').collect::<Vec<&str>>().pop().unwrap().to_string();
+			    //or
+                val
+            },
+			_ => "Unknown".to_string(),
 		}
 	}
 	
 	pub fn get_uptime() -> String {
-		//`uptime -p` komutu
-		let up_time = std::process::Command::new("uptime").arg("-p").output();
-		let up_time = match up_time {
+		/*let up_time = match up_time {
 			Ok(x) => {
 				let time = String::from_utf8(x.stdout)
 					.unwrap()
-					/*.replace("hours", "saat")
-					.replace("hour", "saat")
-					.replace("minutes", "dakkikadir")
-					.replace("minute", "dakkikadir") //turkish moment from creyde.sh
-					.replace("days", "gün")
-					.replace("day", "gün")
+					/*.replace("hour(s)", "saat")
+					.replace("minute(s)", "dakkikadir") //turkish moment from creyde.sh
+					.replace("day(s)", "gün")
 					.replace("up ", "")*/;
 				time
 			}
 			Err(_) => "Can't get data.".to_string(),
-		};
+		};*/
+	    let up_time = cuptime_parser::command_uptime_parser();
 		let up_time = up_time.replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
 	
 		up_time

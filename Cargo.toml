@@ -1,6 +1,6 @@
 [package]
 name = "fetrust"
-version = "0.1.1"
+version = "0.1.5"
 edition = "2021"
 description = "fetchtool in rust"
 categories = ["os","fetching","system","device"]
@@ -12,3 +12,4 @@ ansi_term = "0.12.1"
 tinyrand = "0.5"
 tinyrand-std = "0.5"
 another_json_minimal = "0.0.2"
+cuptime_parser = "0.1.0"
