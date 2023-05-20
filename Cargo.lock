@@ -25,7 +25,7 @@ checksum = "d29c225fe7767ae876b15742b7ed9ea0ac39abb8f9c3a296f62292caa7c61a6a"
 
 [[package]]
 name = "fetrust"
-version = "0.1.1"
+version = "0.1.5"
 dependencies = [
  "another_json_minimal",
  "ansi_term",
