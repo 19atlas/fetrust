@@ -9,7 +9,7 @@ make build && sudo make install
 ### TODO List:
 - [X] Config support
 - [X] Automatic creating config folder/files
-- [ ] Making it works without any library and bloat blobs (failed) 
+- [ ] ~~Making it works without any library and blo at blobs~~ (failed by mertoalex) 
 - [ ] Getting more information from device
 - [X] Writing ASCII art depends on distro
 - [ ] Getting ram usage
