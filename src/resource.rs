@@ -13,6 +13,7 @@ pub struct SystemInfos {
 
 pub mod sys {
 	use crate::resource::SystemInfos;
+    use std::process::Command;
 	pub fn init() -> SystemInfos {
 		SystemInfos {
 			os: get_os(),
@@ -45,7 +46,7 @@ pub mod sys {
 	
 	pub fn get_release() -> String {
         let mut version = "unknown release".to_string();
-        match std::process::Command::new("lsb_release").arg("-sr").output() {
+        match Command::new("lsb_release").arg("-sr").output() {
 		    Ok(release_d) => {version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", "");} // gereksiz \n leri siler //turkish moment from creyde.sh
             _ => {}
         }
@@ -133,6 +134,11 @@ pub mod sys {
             _ => {
                 if cfg!(target_os = "freebsd") {
                     hostname_str = std::env::var("HOST").unwrap();
+                }
+                else if cfg!(target_os = "linux"){
+                    let out = Command::new("sh").arg("-c").arg("hostname").output().expect("host"); //parabola linux
+
+                    let mut _hostname_str = out.stdout;
                 }
             }
         }
