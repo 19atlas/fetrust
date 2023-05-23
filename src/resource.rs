@@ -119,29 +119,19 @@ pub mod sys {
 		})
 		.unwrap()
 	}
-	pub fn get_hostname() -> String {
-		/* get $HOSTNAME with old way
-		let hostname_var = if cfg!(target_os = "linux") {
-			"HOSTNAME"
-		} else {
-			"COMPUTERNAME"
-		};
-		std::env::var(hostname_var).unwrap_or("hostname".to_string())*/
-		use std::fs;
+	pub fn get_hostname() -> String {	
 		let mut hostname_str = "unknown hostname".to_string();
-        match fs::read_to_string("/etc/hostname") {
-            Ok(file) => {hostname_str = file;}
-            _ => {
-                if cfg!(target_os = "freebsd") {
-                    hostname_str = std::env::var("HOST").unwrap();
-                }
-                else if cfg!(target_os = "linux"){
-                    let out = Command::new("sh").arg("-c").arg("hostname").output().expect("host"); //parabola linux
-
-                    let mut _hostname_str = out.stdout;
-                }
-            }
-        }
+			match std::fs::read_to_string("/etc/hostname") {
+				Ok(file) => {hostname_str = file;}
+				_ => {
+					match std::env::var("HOST") {
+						Ok(host) => {hostname_str = host;} _ => {} 
+					}
+					if hostname_str == "unknown hostname"{
+						hostname_str = std::str::from_utf8(&std::process::Command::new("sh").arg("-c").arg("hostname").output().expect("[E] error on hostname command.").stdout).expect("[E] hostname contains non-utf8 characters.").to_string().replace("\n","");
+					}
+				}
+			}
 		hostname_str
 	}
 
