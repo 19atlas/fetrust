@@ -1,10 +1,34 @@
 # fetrust
 a minimal and fast system info program
 
-## For downloading: 
+## [Just]
+
+### All Available list
+```sh
+just -l
+```
+
+### Install
+```sh
+just i
+```
+
+### Uninstall
+```sh
+just u
+```
+
+## [Make]
+
+### For build and install: 
 ```
 make build && sudo make install
 ```
+## For delete:
+```
+sudo make uninstall
+```
+
 
 ### TODO List:
 - [X] Config support
@@ -15,9 +39,5 @@ make build && sudo make install
 - [ ] Getting ram usage
 <!-- "- [X] Support" wth is that, bruh creyde.sh -->
 
-## For delete:
-```
-sudo make uninstall
-```
 
 Thanks.
