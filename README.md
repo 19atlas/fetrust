@@ -1,8 +1,10 @@
 # fetrust
 a minimal and fast system info program
 
-## [Just]
+![resim](https://github.com/19atlas/fetrust/assets/67108558/9b596fa9-6a3d-4c5b-87e7-e2d66a4a4cde)
 
+
+## [Just]
 ### All Available list
 ```sh
 just -l
@@ -19,7 +21,6 @@ just u
 ```
 
 ## [Make]
-
 ### For build and install: 
 ```
 make build && sudo make install
