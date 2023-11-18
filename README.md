@@ -1,8 +1,7 @@
 # fetrust
 a minimal and fast system info program
-
-![resim](https://github.com/19atlas/fetrust/assets/67108558/9b596fa9-6a3d-4c5b-87e7-e2d66a4a4cde)
-
+##looks like:
+![image psd](https://github.com/19atlas/fetrust/assets/67108558/64340c6b-c2df-4839-bbed-bbf109a55ae7)
 
 ## [Just]
 ### All Available list
