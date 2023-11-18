@@ -46,14 +46,11 @@ pub mod sys {
 
     pub fn get_release() -> String {
         let mut version = "unknown release".to_string();
-        match Command::new("lsb_release").arg("-sr").output() {
-            Ok(release_d) => {
-                version = String::from_utf8(release_d.stdout)
-                    .expect("ver")
-                    .replace('\n', "");
-            } // gereksiz \n leri siler //turkish moment from creyde.sh
-            _ => {}
-        }
+        if let Ok(release_d) = Command::new("lsb_release").arg("-sr").output() {
+            version = String::from_utf8(release_d.stdout)
+                .expect("ver")
+                .replace('\n', "");
+        } // gereksiz \n leri siler //turkish moment from creyde.sh
         version
     }
 
@@ -65,8 +62,7 @@ pub mod sys {
         let mut linux_distro = "GNU/Linux".to_string();
         #[cfg(target_os = "freebsd")]
         let mut linux_distro = "BSD".to_string();
-        for line in 0..os_release.len() {
-            let readed_line = os_release[line].to_string();
+        for readed_line in &os_release {
             if readed_line.starts_with("PRETTY_NAME=\"") {
                 linux_distro = readed_line.replace("PRETTY_NAME=", "").replace('\"', "");
                 break;
@@ -130,11 +126,8 @@ pub mod sys {
                 hostname_str = file;
             }
             _ => {
-                match std::env::var("HOST") {
-                    Ok(host) => {
-                        hostname_str = host;
-                    }
-                    _ => {}
+                if let Ok(host) = std::env::var("HOST") {
+                    hostname_str = host;
                 }
                 if hostname_str == "unknown hostname" {
                     hostname_str = std::str::from_utf8(

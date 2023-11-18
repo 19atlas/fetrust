@@ -13,8 +13,8 @@ pub fn get_banner(bannered: String) -> String {
         println!("Creating default font ({})", config_file);
         if fs::create_dir_all(format!("{}/.config/fetrust", env!("HOME"))).is_err() {
             println!(
-                "Error: Something happened wrong (creating {})",
-                format!("{}/.config/", env!("HOME"))
+                "Error: Something happened wrong (creating {}/.config/",
+                env!("HOME")
             )
         }
         //http://www.figlet.org/fonts/smslant.flf
@@ -43,8 +43,8 @@ fn main() {
         println!("Creating default config ({})", config_file);
         if fs::create_dir_all(format!("{}/.config/fetrust", env!("HOME"))).is_err() {
             println!(
-                "Error: Something happened wrong (creating {})",
-                format!("{}/.config/", env!("HOME"))
+                "Error: Something happened wrong (creating {}/.config)",
+                env!("HOME")
             )
         }
         if fs::write(&config_file, b"{\n\t\"banner\":\t\t\t[[\"os\"], \"rand\"],\n\t\"user_a_host_name\":\t[[\"          \",\"username\",\"@\",\"hostname\",\"          \"], \"yellow\"],\n\t\"brace\":\t\t\t[[\"____________________________________\"], null],\n\t\"os\":\t\t\t\t[[\"os\t==> \",\"os\",\" \",\"release\"], null],\n\t\"kernel\":\t\t\t[[\"Kernel\t==> \",\"kernel_name\",\" \",\"kernel\"], \"green\"],\n\t\"shell\":\t\t\t[[\"Shell\t==> \",\"shell\"], \"purple\"],\n\t\"family\":\t\t\t[[\"Family\t==> \",\"family\"], \"cyan\"],\n\t\"uptime\":\t\t\t[[\"Uptime\t==> \",\"uptime\"], null],\n\t\"cpu_type\":\t\t\t[[\"CPUt\t==> \",\"cpu_type\"], null]\n}").is_err() {
@@ -63,157 +63,141 @@ fn main() {
         "uptime",
         "cpu_type",
     ] {
-        match json.as_ref().unwrap().get(info) {
-            Some(info) => {
-                match info {
-                    Json::OBJECT { name, value } => {
-                        let mut printing = "".to_string();
-                        let mut printingc = "".to_string();
-                        match value.unbox() {
-                            Json::ARRAY(value) => {
-                                match value[0].unbox() {
-                                    Json::ARRAY(value) => {
-                                        let mut printingl = vec!["".to_string(); value.len()];
-                                        let mut i = 0;
-                                        for string in value {
-                                            printingl[i] = string.print();
-                                            i += 1;
-                                        }
-                                        i = 0;
+        if let Some(Json::OBJECT { name, value }) = json.as_ref().unwrap().get(info) {
+            let mut printing = "".to_string();
+            let mut printingc = "".to_string();
+            if let Json::ARRAY(value) = value.unbox() {
+                if let Json::ARRAY(value) = value[0].unbox() {
+                    let mut printingl = vec!["".to_string(); value.len()];
+                    let mut i = 0;
+                    for string in value {
+                        printingl[i] = string.print();
+                        i += 1;
+                    }
+                    i = 0;
 
-                                        let bprintingl = printingl.clone();
+                    let bprintingl = printingl.clone();
 
-                                        for getter in bprintingl {
-                                            match getter.as_str() {
-                                                "os" => printingl[i] = infos.os.clone(),
-                                                "os_release" => {
-                                                    printingl[i] = infos.os_release.clone()
-                                                }
-                                                "username" => printingl[i] = infos.username.clone(),
-                                                "hostname" => printingl[i] = infos.hostname.clone(),
-                                                "kernel_name" => {
-                                                    printingl[i] = infos.kernel_name.clone()
-                                                }
-                                                "kernel" => printingl[i] = infos.kernel.clone(),
-                                                "shell" => printingl[i] = infos.shell.clone(),
-                                                "family" => printingl[i] = infos.family.clone(),
-                                                "uptime" => printingl[i] = infos.uptime.clone(),
-                                                "cpu_type" => printingl[i] = infos.cpu_type.clone(),
-                                                _ => {}
-                                            }
-                                            i += 1;
-                                        }
-                                        printingc = printingl.join("");
-                                    }
-                                    _ => {}
-                                }
-                                match value[1].unbox() {
-                                    Json::STRING(value) => match value.as_str() {
-                                        "black" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Black.paint(&printingc).to_string();
-                                        }
-                                        "red" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Red.paint(&printingc).to_string();
-                                        }
-                                        "green" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Green.paint(&printingc).to_string();
-                                        }
-                                        "yellow" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Yellow.paint(&printingc).to_string();
-                                        }
-                                        "blue" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Blue.paint(&printingc).to_string();
-                                        }
-                                        "purple" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Purple.paint(&printingc).to_string();
-                                        }
-                                        "cyan" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = Cyan.paint(&printingc).to_string();
-                                        }
-                                        "white" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            printing = White.paint(&printingc).to_string();
-                                        }
-                                        "rand" | "random" => {
-                                            if name.as_str() == "banner" {
-                                                printingc = get_banner(printingc.to_string());
-                                            }
-                                            let (r, g, b) = random_color_codes();
-                                            printing = RGB(r, g, b).paint(&printingc).to_string();
-                                        }
-                                        _ => {
-                                            printing = printingc;
-                                            println!("{}", Yellow.paint(format!("Warning: Color \"{}\" isn't defined, so it's default color.", value.as_str())));
-                                        }
-                                    },
-                                    Json::NULL => {
-                                        printing = printingc;
-                                    }
-                                    _ => {}
-                                }
-                                //" idk to should I delete this
-                                match name.as_str() {
-                                    "banner" => {
-                                        println!("{}", printing);
-                                    }
-                                    "user_a_host_name" => {
-                                        println!("{}", printing);
-                                    }
-                                    "brace" => {
-                                        println!("{}", printing);
-                                    }
-                                    "os" => {
-                                        println!("{}", printing);
-                                    }
-                                    "kernel" => {
-                                        println!("{}", printing);
-                                    }
-                                    "shell" => {
-                                        println!("{}", printing);
-                                    }
-                                    "family" => {
-                                        println!("{}", printing);
-                                    }
-                                    "uptime" => {
-                                        println!("{}", printing);
-                                    }
-                                    "cpu_type" => {
-                                        println!("{}", printing);
-                                    }
-                                    _ => {}
-                                }
-                                //"
-                            }
+                    for getter in bprintingl {
+                        match getter.as_str() {
+                            "os" => printingl[i] = infos.os.clone(),
+                            "os_release" => printingl[i] = infos.os_release.clone(),
+                            "username" => printingl[i] = infos.username.clone(),
+                            "hostname" => printingl[i] = infos.hostname.clone(),
+                            "kernel_name" => printingl[i] = infos.kernel_name.clone(),
+                            "kernel" => printingl[i] = infos.kernel.clone(),
+                            "shell" => printingl[i] = infos.shell.clone(),
+                            "family" => printingl[i] = infos.family.clone(),
+                            "uptime" => printingl[i] = infos.uptime.clone(),
+                            "cpu_type" => printingl[i] = infos.cpu_type.clone(),
                             _ => {}
                         }
+                        i += 1;
+                    }
+                    printingc = printingl.join("");
+                }
+                match value[1].unbox() {
+                    Json::STRING(value) => {
+                        match value.as_str() {
+                            "black" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Black.paint(&printingc).to_string();
+                            }
+                            "red" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Red.paint(&printingc).to_string();
+                            }
+                            "green" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Green.paint(&printingc).to_string();
+                            }
+                            "yellow" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Yellow.paint(&printingc).to_string();
+                            }
+                            "blue" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Blue.paint(&printingc).to_string();
+                            }
+                            "purple" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Purple.paint(&printingc).to_string();
+                            }
+                            "cyan" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = Cyan.paint(&printingc).to_string();
+                            }
+                            "white" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                printing = White.paint(&printingc).to_string();
+                            }
+                            "rand" | "random" => {
+                                if name.as_str() == "banner" {
+                                    printingc = get_banner(printingc.to_string());
+                                }
+                                let (r, g, b) = random_color_codes();
+                                printing = RGB(r, g, b).paint(&printingc).to_string();
+                            }
+                            _ => {
+                                printing = printingc;
+                                println!("{}", Yellow.paint(format!("Warning: Color \"{}\" isn't defined, so it's default color.", value.as_str())));
+                            }
+                        }
+                    }
+                    Json::NULL => {
+                        printing = printingc;
                     }
                     _ => {}
                 }
+                //" idk to should I delete this
+                match name.as_str() {
+                    "banner" => {
+                        println!("{}", printing);
+                    }
+                    "user_a_host_name" => {
+                        println!("{}", printing);
+                    }
+                    "brace" => {
+                        println!("{}", printing);
+                    }
+                    "os" => {
+                        println!("{}", printing);
+                    }
+                    "kernel" => {
+                        println!("{}", printing);
+                    }
+                    "shell" => {
+                        println!("{}", printing);
+                    }
+                    "family" => {
+                        println!("{}", printing);
+                    }
+                    "uptime" => {
+                        println!("{}", printing);
+                    }
+                    "cpu_type" => {
+                        println!("{}", printing);
+                    }
+                    _ => {}
+                }
+                //"
             }
-            _ => {}
         }
     }
 }
