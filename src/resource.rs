@@ -47,7 +47,7 @@ pub mod sys {
 	pub fn get_release() -> String {
         let mut version = "unknown release".to_string();
         match Command::new("lsb_release").arg("-sr").output() {
-		    Ok(release_d) => {version = String::from_utf8(release_d.stdout).expect("ver").replace("\n", "");} // gereksiz \n leri siler //turkish moment from creyde.sh
+		    Ok(release_d) => {version = String::from_utf8(release_d.stdout).expect("ver").replace('\n', "");} // gereksiz \n leri siler //turkish moment from creyde.sh
             _ => {}
         }
         version
@@ -56,7 +56,7 @@ pub mod sys {
 	pub fn get_unix_distro(file: &str) -> String {
 		use std::fs;
 		let os_release = fs::read_to_string(file).unwrap();
-		let os_release: Vec<&str> = os_release.split("\n").collect();
+		let os_release: Vec<&str> = os_release.split('\n').collect();
 		#[cfg(any(target_os = "linux", target_os = "android"))]
 		let mut linux_distro = "GNU/Linux".to_string();
         #[cfg(target_os = "freebsd")]
@@ -64,7 +64,7 @@ pub mod sys {
 		for line in 0..os_release.len() {
 			let readed_line = os_release[line].to_string();
 			if readed_line.starts_with("PRETTY_NAME=\"") {
-				linux_distro = readed_line.replace("PRETTY_NAME=", "").replace("\"", "");
+				linux_distro = readed_line.replace("PRETTY_NAME=", "").replace('\"', "");
 				break
 			 }
 		}
@@ -97,7 +97,7 @@ pub mod sys {
 				let rev_kernel_ver: String =
 					String::from_utf8(x.stdout).unwrap().chars().rev().collect();
 				let rev_kernel_ver = rev_kernel_ver
-					.split("\n")
+					.split('\n')
 					.last()
 					.unwrap()
 					.chars()
@@ -128,7 +128,7 @@ pub mod sys {
 						Ok(host) => {hostname_str = host;} _ => {} 
 					}
 					if hostname_str == "unknown hostname"{
-						hostname_str = std::str::from_utf8(&std::process::Command::new("sh").arg("-c").arg("hostname").output().expect("[E] error on hostname command.").stdout).expect("[E] hostname contains non-utf8 characters.").to_string().replace("\n","");
+						hostname_str = std::str::from_utf8(&std::process::Command::new("sh").arg("-c").arg("hostname").output().expect("[E] error on hostname command.").stdout).expect("[E] hostname contains non-utf8 characters.").to_string().replace('\n',"");
 					}
 				}
 			}
@@ -168,23 +168,23 @@ pub mod sys {
 			Err(_) => "Can't get data.".to_string(),
 		};*/
 	    let up_time = cuptime_parser::command_uptime_parser();
-		let up_time = up_time.replace("\n", ""); // gereksiz \n leri siler //turkish moment from creyde.sh
+		 // gereksiz \n leri siler //turkish moment from creyde.sh
 	
-		up_time
+		up_time.replace('\n', "")
 	}
 
 	pub fn get_kernel_name() -> String {
 		let kernel_name: String = String::from(std::env::consts::OS);
-		return kernel_name;
+		kernel_name
 	}
 
 	pub fn get_family() -> String {
 		let family: String = String::from(std::env::consts::FAMILY);
-		return family;
+		family
 	}
 
 	pub fn get_cput() -> String {
 		let cput: String = String::from(std::env::consts::ARCH);
-		return cput;
+		cput
 	}
 }

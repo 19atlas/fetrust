@@ -20,12 +20,12 @@ pub fn get_banner(bannered: String) -> String {
 	let slant = figlet_rs::FIGfont::from_file(config_file.as_str()).unwrap();
 	let bannered = slant.convert(&bannered.replace("Linux",""));
 	assert!(bannered.is_some());
-	return bannered.unwrap().to_string();
+	bannered.unwrap().to_string()
 }
 
 pub fn random_color_codes() -> (u8, u8, u8) {
 	let mut rand = thread_rand();
-	return (rand.next_u16() as u8,rand.next_u16() as u8,rand.next_u16() as u8);
+	(rand.next_u16() as u8,rand.next_u16() as u8,rand.next_u16() as u8)
 }
 
 
@@ -53,7 +53,7 @@ fn main() {
 							let mut i = 0;
 							for string in value {
 								printingl[i] = string.print();
-								i = i + 1;
+								i += 1;
 							}	i = 0;
 
 							let bprintingl = printingl.clone();
@@ -71,7 +71,7 @@ fn main() {
 									"uptime"		=> {printingl[i] = infos.uptime.clone()}
 									"cpu_type"		=> {printingl[i] = infos.cpu_type.clone()}
 									_ => {}
-								}	i = i + 1;
+								}	i += 1;
 							}
 							printingc = printingl.join("");
 						} _ => {}}
@@ -79,53 +79,53 @@ fn main() {
 							match value.as_str() {
 								"black" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Black.paint(&printingc).to_string();
 								} "red" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Red.paint(&printingc).to_string();
 								} "green" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Green.paint(&printingc).to_string();
 								} "yellow" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Yellow.paint(&printingc).to_string();
 								} "blue" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Blue.paint(&printingc).to_string();
 								} "purple" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Purple.paint(&printingc).to_string();
 								} "cyan" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = Cyan.paint(&printingc).to_string();
 								} "white" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									printing = White.paint(&printingc).to_string();
 								} "rand" | "random" => {
 									if name.as_str() == "banner" {
-										printingc = get_banner(format!("{}", &printingc));
+										printingc = get_banner(printingc.to_string());
 									}
 									let (r,g,b) = random_color_codes();
 									printing = RGB(r,g,b).paint(&printingc).to_string();
 								} _ => {
 									printing = printingc;
-									println!("{}", Yellow.paint(format!("Warning: Color \"{}\" isn't defined, so it's default color.", value.as_str())).to_string());
+									println!("{}", Yellow.paint(format!("Warning: Color \"{}\" isn't defined, so it's default color.", value.as_str())));
 								}
 							}
 						} Json::NULL => {
@@ -134,23 +134,23 @@ fn main() {
 					//" idk to should I delete this
 					match name.as_str() {
 						"banner" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "user_a_host_name" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "brace" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "os" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "kernel" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "shell" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "family" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "uptime" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} "cpu_type" => {
-							print!("{}\n", printing);
+							println!("{}", printing);
 						} _ => {}}
 					//"
 					} _ => {}}
