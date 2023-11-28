@@ -36,6 +36,7 @@ sudo make uninstall
 - [X] Automatic creating config folder/files
 - [ ] ~~Making it works without any library and bloat blobs~~ (failed by mertoalex) 
 - [ ] Get more information from device
+- [ ] instalation function for once.(make more themeing)
 - [X] Writing ASCII art depends on distro
 - [ ] Get ram usage
 - [ ] Get theme (wm, gtk, font name, cursor etc.)
