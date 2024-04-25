@@ -41,6 +41,7 @@ sudo make uninstall
 - [ ] Get ram usage
 - [ ] Get theme (wm, gtk, font name, cursor etc.)
 <!-- "- [X] Support" wth is that, bruh creyde.sh -->
+- [ ] ascii according to the tropics of the moon
 
 
 Thanks.
