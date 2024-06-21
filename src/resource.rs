@@ -44,6 +44,7 @@ pub mod sys {
         return "NetBSD".to_string();
     }
 
+    #[cfg(any(target_os = "linux", target_os = "android"))]
     pub fn get_release() -> String {
         let mut version = "unknown release".to_string();
         if let Ok(release_d) = Command::new("lsb_release").arg("-sr").output() {
@@ -54,6 +55,7 @@ pub mod sys {
         version
     }
 
+    #[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
     pub fn get_unix_distro(file: &str) -> String {
         use std::fs;
         let os_release = fs::read_to_string(file).unwrap();
@@ -79,18 +81,12 @@ pub mod sys {
         #[cfg(target_os = "ios")]
         return "XNU".to_string();
         #[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
-        return get_kernel_version();
-        #[cfg(target_os = "dragonfly")]
+        return get_ukernel_info();
+        #[cfg(any(target_os = "dragonfly", target_os = "openbsd", target_os = "netbsd"))]
         return "BSD".to_string();
-        #[cfg(target_os = "openbsd")]
-        return "BSD".to_string();
-        #[cfg(target_os = "netbsd")]
-        return "BSD".to_string();
-        #[cfg(target = "unix")]
-        return "Unix".to_string();
     }
 
-    pub fn get_kernel_version() -> String {
+    pub fn get_ukernel_info() -> String {
         let krl_vr = std::process::Command::new("uname").arg("-r").output();
         let krl_vr = match krl_vr {
             Ok(x) => {
@@ -119,6 +115,15 @@ pub mod sys {
         })
         .unwrap()
     }
+    #[cfg(target_os = "windows")]
+    pub fn get_hostname() -> String{
+        Command::new("cmd")
+            .args(["/C", "hostname"])
+            .output()
+            .expect("hostname")
+    }
+
+    #[cfg(not(target_os = "windows"))]
     pub fn get_hostname() -> String {
         let mut hostname_str = "unknown hostname".to_string();
         match std::fs::read_to_string("/etc/hostname") {
@@ -170,7 +175,14 @@ pub mod sys {
             _ => "Unknown".to_string(),
         }
     }
-
+    #[cfg(target_os = "windows")]
+    pub fn get_uptime() -> String{
+        Command::new("cmd")
+        .args(["/C", "systeminfo | find 'Boot Time' "])
+        .output()
+        .expect("1")
+    }
+    #[cfg(not(target_os = "windows"))]
     pub fn get_uptime() -> String {
         /*let up_time = match up_time {
             Ok(x) => {

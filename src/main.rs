@@ -37,6 +37,8 @@ pub fn random_color_codes() -> (u8, u8, u8) {
 }
 
 fn main() {
+    let mut cache: Vec<String> = Vec::new();
+    let mut max_length = 0;
     let infos = crate::resource::sys::init();
     let config_file = format!("{}/.config/fetrust/{}", env!("HOME"), "config.json");
     if !Path::new(&config_file).exists() {
@@ -47,7 +49,7 @@ fn main() {
                 env!("HOME")
             )
         }
-        if fs::write(&config_file, b"{\n\t\"banner\":\t\t\t[[\"os\"], \"rand\"],\n\t\"user_a_host_name\":\t[[\"          \",\"username\",\"@\",\"hostname\",\"          \"], \"yellow\"],\n\t\"brace\":\t\t\t[[\"____________________________________\"], null],\n\t\"os\":\t\t\t\t[[\"os\t==> \",\"os\",\" \",\"release\"], null],\n\t\"kernel\":\t\t\t[[\"Kernel\t==> \",\"kernel_name\",\" \",\"kernel\"], \"green\"],\n\t\"shell\":\t\t\t[[\"Shell\t==> \",\"shell\"], \"purple\"],\n\t\"family\":\t\t\t[[\"Family\t==> \",\"family\"], \"cyan\"],\n\t\"uptime\":\t\t\t[[\"Uptime\t==> \",\"uptime\"], null],\n\t\"cpu_type\":\t\t\t[[\"CPUt\t==> \",\"cpu_type\"], null]\n}").is_err() {
+        if fs::write(&config_file, b"{\n\t\"banner\":\t\t\t[[\"os\"], \"rand\"],\n\t\"user_a_host_name\":\t[[\"          \",\"username\",\"@\",\"hostname\",\"          \"], \"yellow\"],\n\t\"os\":\t\t\t\t[[\"os\t==> \",\"os\",\" \",\"release\"], null],\n\t\"kernel\":\t\t\t[[\"Kernel\t==> \",\"kernel_name\",\" \",\"kernel\"], \"green\"],\n\t\"shell\":\t\t\t[[\"Shell\t==> \",\"shell\"], \"purple\"],\n\t\"family\":\t\t\t[[\"Family\t==> \",\"family\"], \"cyan\"],\n\t\"uptime\":\t\t\t[[\"Uptime\t==> \",\"uptime\"], null],\n\t\"cpu_type\":\t\t\t[[\"CPUt\t==> \",\"cpu_type\"], null]\n}").is_err() {
 			println!("Error: Something happened wrong (writing {})", config_file)}
     }
     let config_json = &fs::read(config_file).unwrap();
@@ -55,7 +57,6 @@ fn main() {
     for info in [
         "banner",
         "user_a_host_name",
-        "brace",
         "os",
         "kernel",
         "shell",
@@ -165,34 +166,61 @@ fn main() {
                     }
                     _ => {}
                 }
-                //" idk to should I delete this
+                //idk should I delete this"
                 match name.as_str() {
                     "banner" => {
-                        println!("{}", printing);
+                        for j in 0..8{
+                            let mut temp_string = String::new();
+                            if j > 1 && j < 7{
+                                if let Some(banner_line) = printing.lines().nth(j-2){
+                                    temp_string.push_str(banner_line);
+                                    temp_string.push_str("       ");
+                                    max_length = temp_string.len();
+                                }
+                            }
+                            cache.push(temp_string);
+                        }
                     }
                     "user_a_host_name" => {
-                        println!("{}", printing);
-                    }
-                    "brace" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(1){
+                            if cache_text.len() < max_length{
+                                cache_text.push_str(&(0..max_length-5).into_iter().map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
+                            }
+                            cache_text.push_str(&printing); // problem that cant 
+                        }
                     }
                     "os" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(2){
+                            cache_text.push_str(&printing);
+                        }
                     }
                     "kernel" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(3){
+                            cache_text.push_str(&printing);
+                        }
                     }
                     "shell" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(4){
+                            cache_text.push_str(&printing);
+                        }
                     }
                     "family" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(5){
+                            cache_text.push_str(&printing);
+                        }
                     }
                     "uptime" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(6){
+                            if cache_text.len() < max_length{
+                                cache_text.push_str(&(0..max_length).into_iter().map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
+                            }
+                            cache_text.push_str(&printing);
+                        }
                     }
                     "cpu_type" => {
-                        println!("{}", printing);
+                        if let Some(cache_text) = cache.get_mut(7){
+                            cache_text.push_str(&printing);
+                        }
                     }
                     _ => {}
                 }
@@ -200,4 +228,6 @@ fn main() {
             }
         }
     }
+    let printable_text = cache.join("\r\n");
+    println!("{}", printable_text);
 }
