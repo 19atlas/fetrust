@@ -34,7 +34,9 @@ pub mod sys {
         return "Windows NT".to_string();
         #[cfg(target_os = "macos")]
         return "XNU/darwin".to_string();
-        #[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
+        #[cfg(target_os = "android")]
+        return "GNU/Linux".to_string();
+        #[cfg(any(target_os = "linux", target_os = "freebsd"))]
         return get_unix_distro("/etc/os-release");
         #[cfg(target_os = "dragonfly")]
         return "DragonflyBSD".to_string();
