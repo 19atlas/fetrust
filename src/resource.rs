@@ -55,12 +55,12 @@ pub mod sys {
         version
     }
 
-    #[cfg(any(target_os = "linux", target_os = "android", target_os = "freebsd"))]
+    #[cfg(any(target_os = "linux", target_os = "freebsd"))]
     pub fn get_unix_distro(file: &str) -> String {
         use std::fs;
         let os_release = fs::read_to_string(file).unwrap();
         let os_release: Vec<&str> = os_release.split('\n').collect();
-        #[cfg(any(target_os = "linux", target_os = "android"))]
+        #[cfg(target_os = "linux")]
         let mut linux_distro = "GNU/Linux".to_string();
         #[cfg(target_os = "freebsd")]
         let mut linux_distro = "BSD".to_string();
