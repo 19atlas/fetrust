@@ -20,16 +20,10 @@ just u
 just -l
 ```
 
-## [Make]
-### For build and install: 
-```
-make build && sudo make install
-```
-## For delete:
-```
-sudo make uninstall
-```
-
+### Thanks for
+- [Mertoalex](https://github.com/mertoalex)
+- [Walker-00](https://github.com/Walker-00)
+- [Speretta](https://github.com/Speretta)
 
 ### TODO List:
 - [X] Config support
