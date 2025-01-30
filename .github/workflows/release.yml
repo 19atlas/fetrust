@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: rust-latest
     steps:
       - uses: actions/checkout@master
       - name: Compile
