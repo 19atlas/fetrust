@@ -9,11 +9,17 @@ pub struct SystemInfos {
     pub family: String,
     pub uptime: String,
     pub cpu_type: String,
+    pub memory: String,
 }
 
 pub mod sys {
     use crate::resource::SystemInfos;
-    use std::process::Command;
+    use std::{
+        fs::File,
+        io::{self, BufRead},
+        path::Path,
+        process::Command,
+    };
     pub fn init() -> SystemInfos {
         SystemInfos {
             os: get_os(),
@@ -26,6 +32,7 @@ pub mod sys {
             family: get_family(),
             uptime: get_uptime(),
             cpu_type: get_cput(),
+            memory: get_memory(),
         }
     }
 
@@ -96,7 +103,7 @@ pub mod sys {
                     String::from_utf8(x.stdout).unwrap().chars().rev().collect();
                 let rev_kernel_ver = rev_kernel_ver
                     .split('\n')
-                    .last()
+                    .next_back()
                     .unwrap()
                     .chars()
                     .rev()
@@ -109,6 +116,51 @@ pub mod sys {
         krl_vr
     }
 
+    #[cfg(not(target_os = "windows"))]
+    fn get_memory() -> String {
+        let path = Path::new("/proc/meminfo");
+        let file = File::open(path).unwrap();
+        let reader = io::BufReader::new(file);
+
+        let mut total: f64 = 0.0;
+        let mut free: f64 = 0.0;
+
+        for line in reader.lines() {
+            let line = line.unwrap();
+            if line.starts_with("MemTotal") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                total = parts[1].parse::<f64>().unwrap_or(0.0) / 1024.0;
+            } else if line.starts_with("MemAvailable") {
+                let parts: Vec<&str> = line.split_whitespace().collect();
+                free = parts[1].parse::<f64>().unwrap_or(0.0) / 1024.0;
+            }
+
+            if total > 0.0 && free > 0.0 {
+                break;
+            }
+        }
+
+        if total.round() != 0.0 {
+            format!("{}Mib / {}Mib", (total - free) as u64, total as u64)
+        } else if (total * 1024.0).round() != 0.0 {
+            let total_kib = (total * 1024.0).round();
+            let free_kib = (free * 1024.0).round();
+            format!(
+                "{}Kib / {}Kib",
+                (total_kib - free_kib) as u64,
+                total_kib as u64
+            )
+        } else {
+            let total_bytes = (total * 1024.0 * 1024.0).round();
+            let free_bytes = (free * 1024.0 * 1024.0).round();
+            format!(
+                "{}Byte / {}Byte",
+                (total_bytes - free_bytes) as u64,
+                total_bytes as u64
+            )
+        }
+    }
+
     pub fn get_username() -> String {
         std::env::var(if cfg!(any(target_os = "linux", target_os = "freebsd")) {
             "USER"
@@ -117,8 +169,9 @@ pub mod sys {
         })
         .unwrap()
     }
+
     #[cfg(target_os = "windows")]
-    pub fn get_hostname() -> String{
+    pub fn get_hostname() -> String {
         Command::new("cmd")
             .args(["/C", "hostname"])
             .output()
@@ -178,11 +231,11 @@ pub mod sys {
         }
     }
     #[cfg(target_os = "windows")]
-    pub fn get_uptime() -> String{
+    pub fn get_uptime() -> String {
         Command::new("cmd")
-        .args(["/C", "systeminfo | find 'Boot Time' "])
-        .output()
-        .expect("1")
+            .args(["/C", "systeminfo | find 'Boot Time' "])
+            .output()
+            .expect("1")
     }
     #[cfg(not(target_os = "windows"))]
     pub fn get_uptime() -> String {
