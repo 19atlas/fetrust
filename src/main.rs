@@ -31,7 +31,7 @@ fn main() {
                 env!("HOME")
             )
         }
-        if fs::write(&config_file, b"{\n\t\"banner\":\t\t\t[[\"os\"], \"rand\"],\n\t\"user_a_host_name\":\t[[\"          \",\"username\",\"@\",\"hostname\",\"          \"], \"yellow\"],\n\t\"os\":\t\t\t\t[[\"os\t==> \",\"os\",\" \",\"release\"], null],\n\t\"kernel\":\t\t\t[[\"Kernel\t==> \",\"kernel_name\",\" \",\"kernel\"], \"green\"],\n\t\"shell\":\t\t\t[[\"Shell\t==> \",\"shell\"], \"purple\"],\n\t\"family\":\t\t\t[[\"Family\t==> \",\"family\"], \"cyan\"],\n\t\"uptime\":\t\t\t[[\"Uptime\t==> \",\"uptime\"], null],\n\t\"cpu_type\":\t\t\t[[\"CPUt\t==> \",\"cpu_type\"], null]\n}").is_err() {
+        if fs::write(&config_file, include_bytes!("default.config.json")).is_err() {
 			println!("Error: Something happened wrong (writing {})", config_file)}
     }
     let config_json = &fs::read(config_file).unwrap();
