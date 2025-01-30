@@ -36,45 +36,36 @@ fn main() {
         "cpu_type",
     ] {
         if let Some(Json::OBJECT { name, value }) = json.as_ref().unwrap().get(info) {
-            let mut printing = "".to_string();
-            let mut printingc = "".to_string();
-            if let Json::ARRAY(value) = value.unbox() {
-                if let Json::ARRAY(value) = value[0].unbox() {
-                    let mut printingl = vec!["".to_string(); value.len()];
-                    let mut i = 0;
-                    for string in value {
-                        printingl[i] = string.print();
-                        i += 1;
-                    }
-                    i = 0;
+            let mut printing = String::new();
+            let mut printingc = String::new();
 
-                    let bprintingl = printingl.clone();
+            if let Json::ARRAY(values) = value.unbox() {
+                if let Json::ARRAY(inner_values) = values.first().unwrap_or(&Json::NULL).unbox() {
+                    let printingl: Vec<String> = inner_values
+                        .iter()
+                        .map(|v| match v.print().as_str() {
+                            "os" => infos.os.clone(),
+                            "os_release" => infos.os_release.clone(),
+                            "username" => infos.username.clone(),
+                            "hostname" => infos.hostname.clone(),
+                            "kernel_name" => infos.kernel_name.clone(),
+                            "kernel" => infos.kernel.clone(),
+                            "shell" => infos.shell.clone(),
+                            "family" => infos.family.clone(),
+                            "uptime" => infos.uptime.clone(),
+                            "cpu_type" => infos.cpu_type.clone(),
+                            _ => String::new(), // Handle unexpected values gracefully
+                        })
+                        .collect();
 
-                    for getter in bprintingl {
-                        match getter.as_str() {
-                            "os" => printingl[i] = infos.os.clone(),
-                            "os_release" => printingl[i] = infos.os_release.clone(),
-                            "username" => printingl[i] = infos.username.clone(),
-                            "hostname" => printingl[i] = infos.hostname.clone(),
-                            "kernel_name" => printingl[i] = infos.kernel_name.clone(),
-                            "kernel" => printingl[i] = infos.kernel.clone(),
-                            "shell" => printingl[i] = infos.shell.clone(),
-                            "family" => printingl[i] = infos.family.clone(),
-                            "uptime" => printingl[i] = infos.uptime.clone(),
-                            "cpu_type" => printingl[i] = infos.cpu_type.clone(),
-                            _ => {}
-                        }
-                        i += 1;
-                    }
                     printingc = printingl.join("");
                 }
-
-                match value[1].unbox() {
-                    Json::STRING(value) => {
+                match values[1].unbox() {
+                    Json::STRING(values) => {
                         if name.as_str() == "banner" {
                             printingc = get_banner(printingc.to_string());
                         }
-                        printing = apply_color(value.as_str(), &printingc);
+                        printing = apply_color(values.as_str(), &printingc);
                     }
                     Json::NULL => {
                         printing = printingc;
