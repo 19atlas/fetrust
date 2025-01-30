@@ -34,38 +34,45 @@ fn main() {
         "family",
         "uptime",
         "cpu_type",
+        "memory",
     ] {
         if let Some(Json::OBJECT { name, value }) = json.as_ref().unwrap().get(info) {
-            let mut printing = String::new();
-            let mut printingc = String::new();
+            let mut printing = "".to_string();
+            let mut printingc = "".to_string();
+            if let Json::ARRAY(value) = value.unbox() {
+                if let Json::ARRAY(value) = value[0].unbox() {
+                    let mut printingl = vec!["".to_string(); value.len()];
+                    for (i, string) in value.iter().enumerate() {
+                        printingl[i] = string.print();
+                    }
 
-            if let Json::ARRAY(values) = value.unbox() {
-                if let Json::ARRAY(inner_values) = values.first().unwrap_or(&Json::NULL).unbox() {
-                    let printingl: Vec<String> = inner_values
-                        .iter()
-                        .map(|v| match v.print().as_str() {
-                            "os" => infos.os.clone(),
-                            "os_release" => infos.os_release.clone(),
-                            "username" => infos.username.clone(),
-                            "hostname" => infos.hostname.clone(),
-                            "kernel_name" => infos.kernel_name.clone(),
-                            "kernel" => infos.kernel.clone(),
-                            "shell" => infos.shell.clone(),
-                            "family" => infos.family.clone(),
-                            "uptime" => infos.uptime.clone(),
-                            "cpu_type" => infos.cpu_type.clone(),
-                            _ => String::new(), // Handle unexpected values gracefully
-                        })
-                        .collect();
+                    let bprintingl = printingl.clone();
 
+                    for (i, getter) in bprintingl.iter().enumerate() {
+                        match getter.as_str() {
+                            "os" => printingl[i] = infos.os.clone(),
+                            "os_release" => printingl[i] = infos.os_release.clone(),
+                            "username" => printingl[i] = infos.username.clone(),
+                            "hostname" => printingl[i] = infos.hostname.clone(),
+                            "kernel_name" => printingl[i] = infos.kernel_name.clone(),
+                            "kernel" => printingl[i] = infos.kernel.clone(),
+                            "shell" => printingl[i] = infos.shell.clone(),
+                            "family" => printingl[i] = infos.family.clone(),
+                            "uptime" => printingl[i] = infos.uptime.clone(),
+                            "cpu_type" => printingl[i] = infos.cpu_type.clone(),
+                            "memory" => printingl[i] = infos.memory.clone(),
+                            _ => {}
+                        }
+                    }
                     printingc = printingl.join("");
                 }
-                match values[1].unbox() {
-                    Json::STRING(values) => {
+
+                match value[1].unbox() {
+                    Json::STRING(value) => {
                         if name.as_str() == "banner" {
                             printingc = get_banner(printingc.to_string());
                         }
-                        printing = apply_color(values.as_str(), &printingc);
+                        printing = apply_color(value.as_str(), &printingc);
                     }
                     Json::NULL => {
                         printing = printingc;
@@ -75,7 +82,7 @@ fn main() {
 
                 match name.as_str() {
                     "banner" => {
-                        for j in 0..8 {
+                        for j in 0..9 {
                             let mut temp_string = String::new();
                             if (2..7).contains(&j) {
                                 if let Some(banner_line) = printing.lines().nth(j - 2) {
@@ -103,6 +110,7 @@ fn main() {
                             "shell" => 4,
                             "family" => 5,
                             "cpu_type" => 7,
+                            "memory" => 8,
                             _ => usize::MAX,
                         };
                         if cache_index != usize::MAX {

@@ -7,5 +7,6 @@
 	"shell":			[["Shell	==> ","shell"], "purple"],
 	"family":			[["Family	==> ","family"], "cyan"],
 	"uptime":			[["Uptime	==> ","uptime"], null],
-	"cpu_type":			[["CPUt	==> ","cpu_type"], null]
+	"cpu_type":		[["CPUt	==> ","cpu_type"], null],
+	"memory":			[["Memory	==> ","memory"], null]
 }
