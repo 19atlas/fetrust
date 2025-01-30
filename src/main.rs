@@ -2,21 +2,9 @@ mod extra_fn;
 mod resource;
 
 use another_json_minimal::*;
-use ansi_term::Colour::*;
-use extra_fn::get_banner;
+use extra_fn::{apply_color, get_banner, handle_spacing};
 use std::fs;
 use std::path::Path;
-use tinyrand::Rand;
-use tinyrand_std::thread_rand;
-
-pub fn random_color_codes() -> (u8, u8, u8) {
-    let mut rand = thread_rand();
-    (
-        rand.next_u16() as u8,
-        rand.next_u16() as u8,
-        rand.next_u16() as u8,
-    )
-}
 
 fn main() {
     let mut cache: Vec<String> = Vec::new();
@@ -80,69 +68,13 @@ fn main() {
                     }
                     printingc = printingl.join("");
                 }
+
                 match value[1].unbox() {
                     Json::STRING(value) => {
-                        match value.as_str() {
-                            "black" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Black.paint(&printingc).to_string();
-                            }
-                            "red" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Red.paint(&printingc).to_string();
-                            }
-                            "green" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Green.paint(&printingc).to_string();
-                            }
-                            "yellow" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Yellow.paint(&printingc).to_string();
-                            }
-                            "blue" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Blue.paint(&printingc).to_string();
-                            }
-                            "purple" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Purple.paint(&printingc).to_string();
-                            }
-                            "cyan" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = Cyan.paint(&printingc).to_string();
-                            }
-                            "white" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                printing = White.paint(&printingc).to_string();
-                            }
-                            "rand" | "random" => {
-                                if name.as_str() == "banner" {
-                                    printingc = get_banner(printingc.to_string());
-                                }
-                                let (r, g, b) = random_color_codes();
-                                printing = RGB(r, g, b).paint(&printingc).to_string();
-                            }
-                            _ => {
-                                printing = printingc;
-                                println!("{}", Yellow.paint(format!("Warning: Color \"{}\" isn't defined, so it's default color.", value.as_str())));
-                            }
+                        if name.as_str() == "banner" {
+                            printingc = get_banner(printingc.to_string());
                         }
+                        printing = apply_color(value.as_str(), &printingc);
                     }
                     Json::NULL => {
                         printing = printingc;
@@ -194,12 +126,4 @@ fn main() {
     }
     let printable_text = cache.join("\r\n");
     println!("{}", printable_text);
-}
-
-fn handle_spacing(cache_text: &mut String, printing: &str, max_length: usize, padding: usize) {
-    if cache_text.len() < max_length {
-        let spaces = " ".repeat(max_length - cache_text.len() - padding);
-        cache_text.push_str(&spaces);
-    }
-    cache_text.push_str(printing);
 }
