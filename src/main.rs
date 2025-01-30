@@ -1,4 +1,5 @@
-pub mod resource;
+mod resource;
+mod extra_fn;
 
 use another_json_minimal::*;
 use ansi_term::Colour::*;
@@ -184,7 +185,7 @@ fn main() {
                     "user_a_host_name" => {
                         if let Some(cache_text) = cache.get_mut(1){
                             if cache_text.len() < max_length{
-                                cache_text.push_str(&(0..max_length-5).into_iter().map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
+                                cache_text.push_str(&(0..max_length-5).map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
                             }
                             cache_text.push_str(&printing); // problem that cant 
                         }
@@ -212,7 +213,7 @@ fn main() {
                     "uptime" => {
                         if let Some(cache_text) = cache.get_mut(6){
                             if cache_text.len() < max_length{
-                                cache_text.push_str(&(0..max_length).into_iter().map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
+                                cache_text.push_str(&(0..max_length).map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
                             }
                             cache_text.push_str(&printing);
                         }

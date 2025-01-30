@@ -1,7 +1,7 @@
 [package]
 name = "fetrust"
 version = "0.1.5"
-edition = "2021"
+edition = "2024"
 description = "fetchtool in rust"
 categories = ["os","fetching","system","device"]
 license = "GPL-3.0"

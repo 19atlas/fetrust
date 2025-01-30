@@ -96,7 +96,7 @@ pub mod sys {
                     String::from_utf8(x.stdout).unwrap().chars().rev().collect();
                 let rev_kernel_ver = rev_kernel_ver
                     .split('\n')
-                    .last()
+                    .next_back()
                     .unwrap()
                     .chars()
                     .rev()
