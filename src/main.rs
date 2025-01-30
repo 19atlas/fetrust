@@ -1,5 +1,5 @@
-mod resource;
 mod extra_fn;
+mod resource;
 
 use another_json_minimal::*;
 use ansi_term::Colour::*;
@@ -32,7 +32,8 @@ fn main() {
             )
         }
         if fs::write(&config_file, include_bytes!("default.config.json")).is_err() {
-			println!("Error: Something happened wrong (writing {})", config_file)}
+            println!("Error: Something happened wrong (writing {})", config_file)
+        }
     }
     let config_json = &fs::read(config_file).unwrap();
     let json = Json::parse(config_json);
@@ -148,13 +149,13 @@ fn main() {
                     }
                     _ => {}
                 }
-                //idk should I delete this"
+
                 match name.as_str() {
                     "banner" => {
-                        for j in 0..8{
+                        for j in 0..8 {
                             let mut temp_string = String::new();
-                            if j > 1 && j < 7{
-                                if let Some(banner_line) = printing.lines().nth(j-2){
+                            if (2..7).contains(&j) {
+                                if let Some(banner_line) = printing.lines().nth(j - 2) {
                                     temp_string.push_str(banner_line);
                                     temp_string.push_str("       ");
                                     max_length = temp_string.len();
@@ -163,53 +164,42 @@ fn main() {
                             cache.push(temp_string);
                         }
                     }
-                    "user_a_host_name" => {
-                        if let Some(cache_text) = cache.get_mut(1){
-                            if cache_text.len() < max_length{
-                                cache_text.push_str(&(0..max_length-5).map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
+                    "uptime" | "user_a_host_name" => {
+                        let padding = if name == "uptime" { 0 } else { 5 };
+                        if let Some(cache_text) = cache.get_mut(match name.as_str() {
+                            "uptime" => 6,
+                            _ => 1,
+                        }) {
+                            handle_spacing(cache_text, &printing, max_length, padding);
+                        }
+                    }
+                    _ => {
+                        let cache_index = match name.as_str() {
+                            "os" => 2,
+                            "kernel" => 3,
+                            "shell" => 4,
+                            "family" => 5,
+                            "cpu_type" => 7,
+                            _ => usize::MAX,
+                        };
+                        if cache_index != usize::MAX {
+                            if let Some(cache_text) = cache.get_mut(cache_index) {
+                                cache_text.push_str(&printing);
                             }
-                            cache_text.push_str(&printing); // problem that cant 
                         }
                     }
-                    "os" => {
-                        if let Some(cache_text) = cache.get_mut(2){
-                            cache_text.push_str(&printing);
-                        }
-                    }
-                    "kernel" => {
-                        if let Some(cache_text) = cache.get_mut(3){
-                            cache_text.push_str(&printing);
-                        }
-                    }
-                    "shell" => {
-                        if let Some(cache_text) = cache.get_mut(4){
-                            cache_text.push_str(&printing);
-                        }
-                    }
-                    "family" => {
-                        if let Some(cache_text) = cache.get_mut(5){
-                            cache_text.push_str(&printing);
-                        }
-                    }
-                    "uptime" => {
-                        if let Some(cache_text) = cache.get_mut(6){
-                            if cache_text.len() < max_length{
-                                cache_text.push_str(&(0..max_length).map(|_| String::from(" ")).collect::<Vec<String>>().join(""));
-                            }
-                            cache_text.push_str(&printing);
-                        }
-                    }
-                    "cpu_type" => {
-                        if let Some(cache_text) = cache.get_mut(7){
-                            cache_text.push_str(&printing);
-                        }
-                    }
-                    _ => {}
                 }
-                //"
             }
         }
     }
     let printable_text = cache.join("\r\n");
     println!("{}", printable_text);
+}
+
+fn handle_spacing(cache_text: &mut String, printing: &str, max_length: usize, padding: usize) {
+    if cache_text.len() < max_length {
+        let spaces = " ".repeat(max_length - cache_text.len() - padding);
+        cache_text.push_str(&spaces);
+    }
+    cache_text.push_str(printing);
 }
