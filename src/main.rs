@@ -94,10 +94,17 @@ fn main() {
                             cache.push(temp_string);
                         }
                     }
-                    "uptime" | "user_a_host_name" => {
-                        let padding = if name == "uptime" { 0 } else { 5 };
+                    "uptime" | "cpu_type" | "user_a_host_name" | "memory" => {
+                        let padding = if name == "uptime" || name == "cpu_type" || name == "memory"
+                        {
+                            0
+                        } else {
+                            5
+                        };
                         if let Some(cache_text) = cache.get_mut(match name.as_str() {
                             "uptime" => 6,
+                            "cpu_type" => 7,
+                            "memory" => 8,
                             _ => 1,
                         }) {
                             handle_spacing(cache_text, &printing, max_length, padding);
@@ -109,8 +116,6 @@ fn main() {
                             "kernel" => 3,
                             "shell" => 4,
                             "family" => 5,
-                            "cpu_type" => 7,
-                            "memory" => 8,
                             _ => usize::MAX,
                         };
                         if cache_index != usize::MAX {
