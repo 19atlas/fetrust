@@ -13,11 +13,10 @@ pub struct SystemInfos {
 }
 
 pub mod sys {
-    use crate::resource::SystemInfos;
+    use crate::{extra_fn::format_memory, resource::SystemInfos};
     use std::{
         fs::File,
-        io::{self, BufRead},
-        path::Path,
+        io::{BufRead, BufReader},
         process::Command,
     };
     pub fn init() -> SystemInfos {
@@ -117,10 +116,8 @@ pub mod sys {
     }
 
     #[cfg(target_os = "windows")]
-    fn get_memory() -> String {
-        use std::process::Command;
-
-        let output = Command::new("cmd").args(&["/C", "systeminfo"]).output();
+    pub fn get_memory() -> String {
+        let output = Command::new("cmd").args(["/C", "systeminfo"]).output();
 
         match output {
             Ok(output) => {
@@ -135,13 +132,13 @@ pub mod sys {
                             let parts: Vec<&str> = line.split(':').collect();
                             if let Some(value) = parts.get(1) {
                                 let value = value.trim().replace(",", "").replace(" MB", "");
-                                total = value.parse::<f64>().unwrap_or(0.0) * 1024.0;
+                                total = value.parse::<f64>().unwrap() * 1024.0 * 1024.0;
                             }
                         } else if line.contains("Available Physical Memory") {
                             let parts: Vec<&str> = line.split(':').collect();
                             if let Some(value) = parts.get(1) {
                                 let value = value.trim().replace(",", "").replace(" MB", "");
-                                free = value.parse::<f64>().unwrap_or(0.0) * 1024.0;
+                                free = value.parse::<f64>().unwrap() * 1024.0 * 1024.0;
                             }
                         }
 
@@ -150,26 +147,8 @@ pub mod sys {
                         }
                     }
 
-                    if total.round() != 0.0 {
-                        let used = total - free;
-                        if total / 1024.0 > 1024.0 {
-                            format!(
-                                "{}MiB / {}MiB",
-                                (used / 1024.0).round() as u64,
-                                (total / 1024.0).round() as u64
-                            )
-                        } else if total > 1024.0 {
-                            format!("{}KiB / {}KiB", used.round() as u64, total.round() as u64)
-                        } else {
-                            format!(
-                                "{}Bytes / {}Bytes",
-                                (used * 1024.0).round() as u64,
-                                (total * 1024.0).round() as u64
-                            )
-                        }
-                    } else {
-                        "Memory information not found.".to_string()
-                    }
+                    let used = total - free;
+                    format_memory(total, used)
                 } else {
                     format!(
                         "Failed to retrieve memory info: {}",
@@ -181,49 +160,98 @@ pub mod sys {
         }
     }
 
-    #[cfg(not(target_os = "windows"))]
-    fn get_memory() -> String {
-        let path = Path::new("/proc/meminfo");
-        let file = File::open(path).unwrap();
-        let reader = io::BufReader::new(file);
+    #[cfg(target_os = "linux")]
+    pub fn get_memory() -> String {
+        let file = File::open("/proc/meminfo").unwrap();
+        let reader = BufReader::new(file);
 
-        let mut total: f64 = 0.0;
-        let mut free: f64 = 0.0;
+        let mut total = 0.0;
+        let mut free = 0.0;
 
         for line in reader.lines() {
             let line = line.unwrap();
             if line.starts_with("MemTotal") {
                 let parts: Vec<&str> = line.split_whitespace().collect();
-                total = parts[1].parse::<f64>().unwrap_or(0.0) / 1024.0;
+                total = parts[1].parse::<f64>().unwrap_or(0.0);
             } else if line.starts_with("MemAvailable") {
                 let parts: Vec<&str> = line.split_whitespace().collect();
-                free = parts[1].parse::<f64>().unwrap_or(0.0) / 1024.0;
+                free = parts[1].parse::<f64>().unwrap_or(0.0);
             }
-
             if total > 0.0 && free > 0.0 {
                 break;
             }
         }
 
-        if total.round() != 0.0 {
-            format!("{}Mib / {}Mib", (total - free) as u64, total as u64)
-        } else if (total * 1024.0).round() != 0.0 {
-            let total_kib = (total * 1024.0).round();
-            let free_kib = (free * 1024.0).round();
-            format!(
-                "{}Kib / {}Kib",
-                (total_kib - free_kib) as u64,
-                total_kib as u64
-            )
-        } else {
-            let total_bytes = (total * 1024.0 * 1024.0).round();
-            let free_bytes = (free * 1024.0 * 1024.0).round();
-            format!(
-                "{}Byte / {}Byte",
-                (total_bytes - free_bytes) as u64,
-                total_bytes as u64
-            )
-        }
+        let used = total - free;
+        format_memory(total, used)
+    }
+
+    #[cfg(target_os = "macos")]
+    pub fn get_memory() -> String {
+        use std::process::Command;
+
+        let total_output = Command::new("sysctl").arg("hw.memsize").output().unwrap();
+        let total = String::from_utf8_lossy(&total_output.stdout)
+            .split_whitespace()
+            .last()
+            .unwrap_or("0")
+            .parse::<f64>()
+            .unwrap_or(0.0)
+            / 1024.0; // Convert Bytes to KiB
+
+        let free_output = Command::new("vm_stat").output().unwrap();
+        let free_pages: f64 = String::from_utf8_lossy(&free_output.stdout)
+            .lines()
+            .filter_map(|line| {
+                if line.contains("Pages free:") {
+                    line.split_whitespace()
+                        .nth(2)
+                        .and_then(|val| val.trim_end_matches('.').parse::<f64>().ok())
+                } else {
+                    None
+                }
+            })
+            .next()
+            .unwrap_or(0.0);
+
+        let free = free_pages * 4096.0 / 1024.0; // Convert Pages to Bytes, then to KiB
+        let used = total - free;
+        format_memory(total, used)
+    }
+
+    #[cfg(any(target_os = "freebsd", target_os = "openbsd", target_os = "netbsd"))]
+    pub fn get_memory() -> String {
+        let total_output = Command::new("sysctl").arg("hw.physmem").output().unwrap();
+        let total = String::from_utf8_lossy(&total_output.stdout)
+            .split_whitespace()
+            .last()
+            .unwrap_or("0")
+            .parse::<f64>()
+            .unwrap_or(0.0)
+            / 1024.0; // Convert Bytes to KiB
+
+        let free_pages_output = Command::new("sysctl")
+            .arg("vm.stats.vm.v_free_count")
+            .output()
+            .unwrap();
+        let free_pages = String::from_utf8_lossy(&free_pages_output.stdout)
+            .split_whitespace()
+            .last()
+            .unwrap_or("0")
+            .parse::<f64>()
+            .unwrap_or(0.0);
+
+        let page_size_output = Command::new("sysctl").arg("hw.pagesize").output().unwrap();
+        let page_size = String::from_utf8_lossy(&page_size_output.stdout)
+            .split_whitespace()
+            .last()
+            .unwrap_or("0")
+            .parse::<f64>()
+            .unwrap_or(0.0);
+
+        let free = free_pages * page_size / 1024.0; // Convert Pages to KiB
+        let used = total - free;
+        format_memory(total, used)
     }
 
     pub fn get_username() -> String {
