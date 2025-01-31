@@ -26,7 +26,7 @@ just -l
 ## TODO List:
 - [X] Config support
 - [X] Automatic creating config folder/files
-- [ ] ~~Making it works without any library and bloat blobs~~ (failed by mertoalex) 
+- [ ] ~~Making it works without any library and bloat blobs~~ (failed by mertoalex and it's impossible without using unsafe blocks to access c kernel apis or use of libc creates!) 
 - [ ] Get more information from device
 - [ ] instalation function for once.(make more themeing)
 - [X] Writing ASCII art depends on distro
