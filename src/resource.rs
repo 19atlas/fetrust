@@ -116,6 +116,71 @@ pub mod sys {
         krl_vr
     }
 
+    #[cfg(target_os = "windows")]
+    fn get_memory() -> String {
+        use std::process::Command;
+
+        let output = Command::new("cmd").args(&["/C", "systeminfo"]).output();
+
+        match output {
+            Ok(output) => {
+                if output.status.success() {
+                    let stdout = String::from_utf8_lossy(&output.stdout);
+
+                    let mut total: f64 = 0.0;
+                    let mut free: f64 = 0.0;
+
+                    for line in stdout.lines() {
+                        if line.contains("Total Physical Memory") {
+                            let parts: Vec<&str> = line.split(':').collect();
+                            if let Some(value) = parts.get(1) {
+                                let value = value.trim().replace(",", "").replace(" MB", "");
+                                total = value.parse::<f64>().unwrap_or(0.0) * 1024.0;
+                            }
+                        } else if line.contains("Available Physical Memory") {
+                            let parts: Vec<&str> = line.split(':').collect();
+                            if let Some(value) = parts.get(1) {
+                                let value = value.trim().replace(",", "").replace(" MB", "");
+                                free = value.parse::<f64>().unwrap_or(0.0) * 1024.0;
+                            }
+                        }
+
+                        if total > 0.0 && free > 0.0 {
+                            break;
+                        }
+                    }
+
+                    if total.round() != 0.0 {
+                        let used = total - free;
+                        if total / 1024.0 > 1024.0 {
+                            format!(
+                                "{}MiB / {}MiB",
+                                (used / 1024.0).round() as u64,
+                                (total / 1024.0).round() as u64
+                            )
+                        } else if total > 1024.0 {
+                            format!("{}KiB / {}KiB", used.round() as u64, total.round() as u64)
+                        } else {
+                            format!(
+                                "{}Bytes / {}Bytes",
+                                (used * 1024.0).round() as u64,
+                                (total * 1024.0).round() as u64
+                            )
+                        }
+                    } else {
+                        "Memory information not found.".to_string()
+                    }
+                } else {
+                    format!(
+                        "Failed to retrieve memory info: {}",
+                        String::from_utf8_lossy(&output.stderr)
+                    )
+                }
+            }
+            Err(e) => format!("Failed to run command: {}", e),
+        }
+    }
+
     #[cfg(not(target_os = "windows"))]
     fn get_memory() -> String {
         let path = Path::new("/proc/meminfo");
