@@ -30,7 +30,7 @@ just -l
 - [ ] Get more information from device
 - [ ] instalation function for once.(make more themeing)
 - [X] Writing ASCII art depends on distro
-- [ ] Get ram usage
+- [X] Get ram usage
 - [ ] Get theme (wm, gtk, font name, cursor etc.)
 <!-- "- [X] Support" wth is that, bruh creyde.sh -->
 - [ ] ascii according to the tropics of the moon
