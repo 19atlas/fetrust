@@ -26,6 +26,6 @@ jobs:
         with:
           files: "fetrust"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: ${{ github.ref_name }}
+          release-tag: 0.1.6
 
           
