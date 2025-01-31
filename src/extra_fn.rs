@@ -68,3 +68,21 @@ pub fn random_color_codes() -> (u8, u8, u8) {
         rand.next_u16() as u8,
     )
 }
+
+pub fn format_memory(total: f64, used: f64) -> String {
+    if total / 1024.0 > 1024.0 {
+        format!(
+            "{}MiB / {}MiB",
+            (used / 1024.0).round() as u64,
+            (total / 1024.0).round() as u64
+        )
+    } else if total > 1024.0 {
+        format!("{}KiB / {}KiB", used.round() as u64, total.round() as u64)
+    } else {
+        format!(
+            "{}Bytes / {}Bytes",
+            (used * 1024.0).round() as u64,
+            (total * 1024.0).round() as u64
+        )
+    }
+}

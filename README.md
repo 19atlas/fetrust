@@ -26,11 +26,11 @@ just -l
 ## TODO List:
 - [X] Config support
 - [X] Automatic creating config folder/files
-- [ ] ~~Making it works without any library and bloat blobs~~ (failed by mertoalex) 
+- [ ] ~~Making it works without any library and bloat blobs~~ (failed by mertoalex and it's impossible without using unsafe blocks to access c kernel apis or use of libc creates!) 
 - [ ] Get more information from device
 - [ ] instalation function for once.(make more themeing)
 - [X] Writing ASCII art depends on distro
-- [ ] Get ram usage
+- [X] Get ram usage
 - [ ] Get theme (wm, gtk, font name, cursor etc.)
 <!-- "- [X] Support" wth is that, bruh creyde.sh -->
 - [ ] ascii according to the tropics of the moon
