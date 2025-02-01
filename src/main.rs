@@ -4,7 +4,6 @@ mod resource;
 
 use another_json_minimal::*;
 use extra_fn::{apply_color, get_banner, handle_spacing};
-use ini::Ini;
 use ini_parser::ini_reader;
 use std::fs;
 use std::path::Path;
