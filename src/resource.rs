@@ -385,11 +385,12 @@ pub mod sys {
         family
     }
 
-    #[cfg(not(target_os = "linux"))]
+    // this only return cpu arch
+    /*#[cfg(not(target_os = "linux"))]
     pub fn get_cput() -> String {
         let cput: String = String::from(std::env::consts::ARCH);
         cput
-    }
+    }*/
 
     #[cfg(target_os = "linux")]
     pub fn get_cput() -> String {
@@ -429,6 +430,60 @@ pub mod sys {
         }
 
         // Return fallback if there's an error
+        "ECPUI".to_string()
+    }
+
+    #[cfg(target_os = "windows")]
+    fn get_cput() -> String {
+        use std::process::Command;
+
+        if let Ok(output) = Command::new("wmic")
+            .args(["cpu", "get", "Name,MaxClockSpeed", "/format:list"])
+            .output()
+        {
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            let mut model_name = String::new();
+            let mut clock_rate_mhz: f64 = 0.0;
+
+            for line in output_str.lines() {
+                if line.starts_with("Name=") {
+                    model_name = line.split('=').nth(1).unwrap().to_string();
+                } else if line.starts_with("MaxClockSpeed=") {
+                    clock_rate_mhz = line
+                        .split('=')
+                        .nth(1)
+                        .unwrap()
+                        .parse::<f64>()
+                        .unwrap_or(0.0);
+                }
+            }
+
+            let clock_rate = if clock_rate_mhz >= 1000.0 {
+                format!("{:.3} GHz", clock_rate_mhz / 1000.0)
+            } else {
+                format!("{:.3} MHz", clock_rate_mhz)
+            };
+
+            return format!("{} @ {}", model_name, clock_rate);
+        }
+
+        "ECPUI".to_string()
+    }
+
+    #[cfg(target_os = "macos")]
+    fn get_cput() -> String {
+        use std::process::Command;
+
+        if let Ok(output) = Command::new("sysctl")
+            .args(["-n", "machdep.cpu.brand_string"])
+            .output()
+        {
+            let model_name = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+            // macOS does not directly provide clock rate, so return only model name.
+            return format!("{} @ Unknown Clock Rate", model_name);
+        }
+
         "ECPUI".to_string()
     }
 }
