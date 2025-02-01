@@ -323,6 +323,7 @@ pub mod sys {
             _ => "Unknown".to_string(),
         }
     }
+
     #[cfg(target_os = "windows")]
     pub fn get_uptime() -> String {
         Command::new("cmd")
@@ -330,6 +331,7 @@ pub mod sys {
             .output()
             .expect("1")
     }
+
     #[cfg(not(target_os = "windows"))]
     fn get_uptime() -> String {
         use std::fs;
@@ -383,8 +385,50 @@ pub mod sys {
         family
     }
 
+    #[cfg(not(target_os = "linux"))]
     pub fn get_cput() -> String {
         let cput: String = String::from(std::env::consts::ARCH);
         cput
+    }
+
+    #[cfg(target_os = "linux")]
+    pub fn get_cput() -> String {
+        let file = File::open("/proc/cpuinfo");
+        if let Ok(file) = file {
+            let reader = BufReader::new(file);
+
+            let mut model_name = String::new();
+            let mut clock_rate_mhz: f64 = 0.0;
+
+            for line in reader.lines().map_while(Result::ok) {
+                if line.starts_with("model name") {
+                    model_name = line.split(':').nth(1).unwrap().trim().to_string();
+                } else if line.starts_with("cpu MHz") {
+                    clock_rate_mhz = line
+                        .split(':')
+                        .nth(1)
+                        .unwrap()
+                        .trim()
+                        .parse::<f64>()
+                        .unwrap_or(0.0);
+                }
+
+                if !model_name.is_empty() && clock_rate_mhz > 0.0 {
+                    break;
+                }
+            }
+
+            // Format the clock rate based on its magnitude
+            let clock_rate = if clock_rate_mhz >= 1000.0 {
+                format!("{:.3} GHz", clock_rate_mhz / 1000.0)
+            } else {
+                format!("{:.3} MHz", clock_rate_mhz)
+            };
+
+            return format!("{} @ {}", model_name, clock_rate);
+        }
+
+        // Return fallback if there's an error
+        "ECPUI".to_string()
     }
 }
