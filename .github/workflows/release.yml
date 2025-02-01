@@ -20,25 +20,42 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 1: Checkout the repository code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install dependencies and build
-        run: |
-          cargo build --release
+      # Step 2: Install Rust toolchain and cargo-release
+      - name: Set up Rust environment
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy, rustfmt
 
-      - name: Bump version if changed
+      - name: Install cargo-release
+        run: cargo install cargo-release
+
+      # Step 3: Build the project in release mode
+      - name: Build project
+        run: cargo build --release
+
+      # Step 4: Extract the version from Cargo.toml
+      - name: Extract version
         id: version
         run: |
-          # Assuming the version is in Cargo.toml, adjust if using package.json or others
           current_version=$(grep -oP 'version\s*=\s*"\K[0-9\.]+' Cargo.toml)
           echo "Current version: $current_version"
           echo "version=$current_version" >> $GITHUB_ENV
 
-      - name: Upload build artifacts
-        if: steps.version.outputs.version != ''
+      # Step 5: Copy the built binary to the root project folder and overwrite if exists
+      - name: Move binary to project root
+        run: |
+          mkdir -p ./build
+          cp -f target/release/fetrust ./build/fetrust-${{ env.version }}
+
+      # Step 6: Upload the binary as an artifact
+      - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fetrust-${{ env.version }}  # Artifact name, can include version
-          path: target/release/fetrust  # Path to your compiled binary or other build artifacts
-         
+          name: fetrust-${{ env.version }}
+          path: ./build/fetrust-${{ env.version }}
+        
