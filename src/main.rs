@@ -4,7 +4,6 @@ mod resource;
 
 use another_json_minimal::*;
 use extra_fn::{apply_color, get_banner, handle_spacing};
-use ini_parser::ini_reader;
 use std::fs;
 use std::path::Path;
 
@@ -37,6 +36,10 @@ fn main() {
         "uptime",
         "cpu_type",
         "memory",
+        "theme",
+        "icon",
+        "font",
+        "cursor",
     ] {
         if let Some(Json::OBJECT { name, value }) = json.as_ref().unwrap().get(info) {
             let mut printing = "".to_string();
@@ -63,6 +66,10 @@ fn main() {
                             "uptime" => printingl[i] = infos.uptime.clone(),
                             "cpu_type" => printingl[i] = infos.cpu_type.clone(),
                             "memory" => printingl[i] = infos.memory.clone(),
+                            "theme" => printingl[i] = infos.theme_name.clone(),
+                            "icon" => printingl[i] = infos.icon_theme.clone(),
+                            "font" => printingl[i] = infos.font_name.clone(),
+                            "cursor" => printingl[i] = infos.cursor_theme.clone(),
                             _ => {}
                         }
                     }
@@ -84,7 +91,7 @@ fn main() {
 
                 match name.as_str() {
                     "banner" => {
-                        for j in 0..9 {
+                        for j in 0..13 {
                             let mut temp_string = String::new();
                             if (2..7).contains(&j) {
                                 if let Some(banner_line) = printing.lines().nth(j - 2) {
@@ -96,8 +103,15 @@ fn main() {
                             cache.push(temp_string);
                         }
                     }
-                    "uptime" | "cpu_type" | "user_a_host_name" | "memory" => {
-                        let padding = if name == "uptime" || name == "cpu_type" || name == "memory"
+                    "uptime" | "cpu_type" | "user_a_host_name" | "memory" | "theme" | "icon"
+                    | "font" | "cursor" => {
+                        let padding = if name == "uptime"
+                            || name == "cpu_type"
+                            || name == "memory"
+                            || name == "theme"
+                            || name == "icon"
+                            || name == "font"
+                            || name == "cursor"
                         {
                             0
                         } else {
@@ -107,6 +121,10 @@ fn main() {
                             "uptime" => 6,
                             "cpu_type" => 7,
                             "memory" => 8,
+                            "theme" => 9,
+                            "icon" => 10,
+                            "font" => 11,
+                            "cursor" => 12,
                             _ => 1,
                         }) {
                             handle_spacing(cache_text, &printing, max_length, padding);
@@ -132,12 +150,4 @@ fn main() {
     }
     let printable_text = cache.join("\r\n");
     println!("{}", printable_text);
-
-    let ini = ini_reader(
-        "/home/walker/.config/gtk-3.0/settings.ini",
-        "Settings",
-        "gtk-theme-name",
-    );
-
-    println!("{ini}");
 }

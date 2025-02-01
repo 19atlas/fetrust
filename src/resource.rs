@@ -10,6 +10,10 @@ pub struct SystemInfos {
     pub uptime: String,
     pub cpu_type: String,
     pub memory: String,
+    pub theme_name: String,
+    pub icon_theme: String,
+    pub font_name: String,
+    pub cursor_theme: String,
 }
 
 pub mod sys {
@@ -20,6 +24,7 @@ pub mod sys {
         process::Command,
     };
     pub fn init() -> SystemInfos {
+        let themes = get_themes();
         SystemInfos {
             os: get_os(),
             os_release: get_release(),
@@ -32,7 +37,18 @@ pub mod sys {
             uptime: get_uptime(),
             cpu_type: get_cput(),
             memory: get_memory(),
+            theme_name: themes.name,
+            icon_theme: themes.icon,
+            font_name: themes.font,
+            cursor_theme: themes.cursor,
         }
+    }
+
+    pub struct Themes {
+        pub name: String,
+        pub icon: String,
+        pub font: String,
+        pub cursor: String,
     }
 
     pub fn get_os() -> String {
@@ -485,5 +501,25 @@ pub mod sys {
         }
 
         "ECPUI".to_string()
+    }
+
+    #[cfg(target_os = "linux")]
+    fn get_themes() -> Themes {
+        use crate::ini_parser::ini_parser;
+
+        let ini = ini_parser(&format!("{}/.config/gtk-3.0/settings.ini", env!("HOME"))).unwrap();
+
+        let section = ini.get("Settings").unwrap();
+        let theme_name = section.get("gtk-theme-name").unwrap();
+        let icon_theme = section.get("gtk-icon-theme-name").unwrap();
+        let font_name = section.get("gtk-font-name").unwrap();
+        let cursor_theme = section.get("gtk-cursor-theme-name").unwrap();
+
+        Themes {
+            name: theme_name.to_string(),
+            icon: icon_theme.to_string(),
+            font: font_name.to_string(),
+            cursor: cursor_theme.to_string(),
+        }
     }
 }

@@ -2,7 +2,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, BufReader};
 
-fn ini_parser(file_path: &str) -> Result<HashMap<String, HashMap<String, String>>, std::io::Error> {
+pub fn ini_parser(
+    file_path: &str,
+) -> Result<HashMap<String, HashMap<String, String>>, std::io::Error> {
     let file = File::open(file_path)?;
     let reader = BufReader::new(file);
     let mut current_section = String::new();
@@ -47,16 +49,4 @@ pub fn ini_reader(file_path: &str, section: &str, field: &str) -> String {
         .get(field)
         .unwrap()
         .to_string()
-
-    /*match ini_parser(ini_path) {
-        Ok(ini_data) => {
-            for (section, data) in ini_data {
-                println!("[{}]", section);
-                for (key, value) in data {
-                    println!("{} = {}", key, value);
-                }
-            }
-        }
-        Err(e) => eprintln!("Error reading INI file: {}", e),
-    }*/
 }

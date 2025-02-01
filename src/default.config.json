@@ -8,5 +8,9 @@
 	"family":			[["Family	==> ","family"], "cyan"],
 	"uptime":			[["Uptime	==> ","uptime"], "rand"],
 	"cpu_type":		[["CPUt	==> ","cpu_type"], null],
-	"memory":			[["Memory	==> ","memory"], null]
+	"memory":			[["Memory	==> ","memory"], null],
+	"theme":			[["Theme	==> ","theme" ], null],
+	"icon":			  [["Icons	==> ","icon"  ], null],
+	"font":			  [["Font	==> ","font"    ], null],
+	"cursor":			[["Cursor	==> ","cursor"], null]
 }
