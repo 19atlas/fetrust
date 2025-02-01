@@ -4,6 +4,8 @@ mod resource;
 
 use another_json_minimal::*;
 use extra_fn::{apply_color, get_banner, handle_spacing};
+use ini::Ini;
+use ini_parser::ini_reader;
 use std::fs;
 use std::path::Path;
 
@@ -131,4 +133,12 @@ fn main() {
     }
     let printable_text = cache.join("\r\n");
     println!("{}", printable_text);
+
+    let ini = ini_reader(
+        "/home/walker/.config/gtk-3.0/settings.ini",
+        "Settings",
+        "gtk-theme-name",
+    );
+
+    println!("{ini}");
 }
