@@ -10,16 +10,24 @@ pub struct SystemInfos {
     pub uptime: String,
     pub cpu_type: String,
     pub memory: String,
+    pub theme_name: String,
+    pub icon_theme: String,
+    pub font_name: String,
+    pub cursor_theme: String,
+    pub desktop: String,
 }
 
 pub mod sys {
     use crate::{extra_fn::format_memory, resource::SystemInfos};
     use std::{
+        env,
         fs::File,
         io::{BufRead, BufReader},
         process::Command,
     };
     pub fn init() -> SystemInfos {
+        let themes = get_themes();
+
         SystemInfos {
             os: get_os(),
             os_release: get_release(),
@@ -32,7 +40,19 @@ pub mod sys {
             uptime: get_uptime(),
             cpu_type: get_cput(),
             memory: get_memory(),
+            theme_name: themes.name,
+            icon_theme: themes.icon,
+            font_name: themes.font,
+            cursor_theme: themes.cursor,
+            desktop: get_desktop(),
         }
+    }
+
+    pub struct Themes {
+        pub name: String,
+        pub icon: String,
+        pub font: String,
+        pub cursor: String,
     }
 
     pub fn get_os() -> String {
@@ -323,6 +343,7 @@ pub mod sys {
             _ => "Unknown".to_string(),
         }
     }
+
     #[cfg(target_os = "windows")]
     pub fn get_uptime() -> String {
         Command::new("cmd")
@@ -330,24 +351,48 @@ pub mod sys {
             .output()
             .expect("1")
     }
-    #[cfg(not(target_os = "windows"))]
-    pub fn get_uptime() -> String {
-        /*let up_time = match up_time {
-            Ok(x) => {
-                let time = String::from_utf8(x.stdout)
-                    .unwrap()
-                    /*.replace("hour(s)", "saat")
-                    .replace("minute(s)", "dakkikadir") //turkish moment from creyde.sh
-                    .replace("day(s)", "gün")
-                    .replace("up ", "")*/;
-                time
-            }
-            Err(_) => "Can't get data.".to_string(),
-        };*/
-        let up_time = cuptime_parser::command_uptime_parser();
-        // gereksiz \n leri siler //turkish moment from creyde.sh
 
-        up_time.replace('\n', "")
+    #[cfg(not(target_os = "windows"))]
+    fn get_uptime() -> String {
+        use std::fs;
+
+        #[allow(unused_imports)]
+        use crate::extra_fn::{format_uptime, get_elapsed_seconds_since, parse_sysctl_boottime};
+
+        #[cfg(target_os = "linux")]
+        {
+            if let Ok(contents) = fs::read_to_string("/proc/uptime") {
+                let parts: Vec<&str> = contents.split_whitespace().collect();
+                if let Some(uptime_str) = parts.first() {
+                    if let Ok(uptime) = uptime_str.parse::<f64>() {
+                        return format_uptime(uptime);
+                    }
+                }
+            }
+            "EUPTM".to_string()
+        }
+
+        #[cfg(any(
+            target_os = "macos",
+            target_os = "freebsd",
+            target_os = "openbsd",
+            target_os = "netbsd"
+        ))]
+        {
+            if let Ok(output) = Command::new("sysctl")
+                .arg("-n")
+                .arg("kern.boottime")
+                .output()
+            {
+                if let Ok(output_str) = String::from_utf8(output.stdout) {
+                    if let Some(boot_time) = parse_sysctl_boottime(&output_str) {
+                        let uptime = get_elapsed_seconds_since(boot_time);
+                        return format_uptime(uptime);
+                    }
+                }
+            }
+            "EUPTM".to_string()
+        }
     }
 
     pub fn get_kernel_name() -> String {
@@ -360,8 +405,150 @@ pub mod sys {
         family
     }
 
+    // this only return cpu arch
+    /*#[cfg(not(target_os = "linux"))]
     pub fn get_cput() -> String {
         let cput: String = String::from(std::env::consts::ARCH);
         cput
+    }*/
+
+    #[cfg(target_os = "linux")]
+    pub fn get_cput() -> String {
+        let file = File::open("/proc/cpuinfo");
+        if let Ok(file) = file {
+            let reader = BufReader::new(file);
+
+            let mut model_name = String::new();
+            let mut clock_rate_mhz: f64 = 0.0;
+
+            for line in reader.lines().map_while(Result::ok) {
+                if line.starts_with("model name") {
+                    model_name = line.split(':').nth(1).unwrap().trim().to_string();
+                } else if line.starts_with("cpu MHz") {
+                    clock_rate_mhz = line
+                        .split(':')
+                        .nth(1)
+                        .unwrap()
+                        .trim()
+                        .parse::<f64>()
+                        .unwrap_or(0.0);
+                }
+
+                if !model_name.is_empty() && clock_rate_mhz > 0.0 {
+                    break;
+                }
+            }
+
+            // Format the clock rate based on its magnitude
+            let clock_rate = if clock_rate_mhz >= 1000.0 {
+                format!("{:.3} GHz", clock_rate_mhz / 1000.0)
+            } else {
+                format!("{:.3} MHz", clock_rate_mhz)
+            };
+
+            return format!("{} @ {}", model_name, clock_rate);
+        }
+
+        // Return fallback if there's an error
+        "ECPUI".to_string()
+    }
+
+    #[cfg(target_os = "windows")]
+    fn get_cput() -> String {
+        use std::process::Command;
+
+        if let Ok(output) = Command::new("wmic")
+            .args(["cpu", "get", "Name,MaxClockSpeed", "/format:list"])
+            .output()
+        {
+            let output_str = String::from_utf8_lossy(&output.stdout);
+            let mut model_name = String::new();
+            let mut clock_rate_mhz: f64 = 0.0;
+
+            for line in output_str.lines() {
+                if line.starts_with("Name=") {
+                    model_name = line.split('=').nth(1).unwrap().to_string();
+                } else if line.starts_with("MaxClockSpeed=") {
+                    clock_rate_mhz = line
+                        .split('=')
+                        .nth(1)
+                        .unwrap()
+                        .parse::<f64>()
+                        .unwrap_or(0.0);
+                }
+            }
+
+            let clock_rate = if clock_rate_mhz >= 1000.0 {
+                format!("{:.3} GHz", clock_rate_mhz / 1000.0)
+            } else {
+                format!("{:.3} MHz", clock_rate_mhz)
+            };
+
+            return format!("{} @ {}", model_name, clock_rate);
+        }
+
+        "ECPUI".to_string()
+    }
+
+    #[cfg(target_os = "macos")]
+    fn get_cput() -> String {
+        use std::process::Command;
+
+        if let Ok(output) = Command::new("sysctl")
+            .args(["-n", "machdep.cpu.brand_string"])
+            .output()
+        {
+            let model_name = String::from_utf8_lossy(&output.stdout).trim().to_string();
+
+            // macOS does not directly provide clock rate, so return only model name.
+            return format!("{} @ Unknown Clock Rate", model_name);
+        }
+
+        "ECPUI".to_string()
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    fn get_themes() -> Themes {
+        let na = String::from("N/A");
+        Themes {
+            name: na.clone(),
+            icon: na.clone(),
+            font: na.clone(),
+            cursor: na.clone(),
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    fn get_themes() -> Themes {
+        use crate::ini_parser::ini_parser;
+
+        let ini = ini_parser(&format!(
+            "{}/.config/gtk-3.0/settings.ini",
+            env::var("HOME").unwrap()
+        ))
+        .unwrap();
+
+        let section = ini.get("Settings").unwrap();
+        let theme_name = section.get("gtk-theme-name").unwrap();
+        let icon_theme = section.get("gtk-icon-theme-name").unwrap();
+        let font_name = section.get("gtk-font-name").unwrap();
+        let cursor_theme = section.get("gtk-cursor-theme-name").unwrap();
+
+        Themes {
+            name: theme_name.to_string(),
+            icon: icon_theme.to_string(),
+            font: font_name.to_string(),
+            cursor: cursor_theme.to_string(),
+        }
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    fn get_desktop() -> String {
+        String::from("N/A")
+    }
+
+    #[cfg(target_os = "linux")]
+    fn get_desktop() -> String {
+        env::var("XDG_CURRENT_DESKTOP").unwrap()
     }
 }

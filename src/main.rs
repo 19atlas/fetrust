@@ -1,22 +1,27 @@
 mod extra_fn;
+mod ini_parser;
 mod resource;
 
 use another_json_minimal::*;
 use extra_fn::{apply_color, get_banner, handle_spacing};
-use std::fs;
 use std::path::Path;
+use std::{env, fs};
 
 fn main() {
     let mut cache: Vec<String> = Vec::new();
     let mut max_length = 0;
     let infos = crate::resource::sys::init();
-    let config_file = format!("{}/.config/fetrust/{}", env!("HOME"), "config.json");
+    let config_file = format!(
+        "{}/.config/fetrust/{}",
+        env::var("HOME").unwrap(),
+        "config.json"
+    );
     if !Path::new(&config_file).exists() {
         println!("Creating default config ({})", config_file);
-        if fs::create_dir_all(format!("{}/.config/fetrust", env!("HOME"))).is_err() {
+        if fs::create_dir_all(format!("{}/.config/fetrust", env::var("HOME").unwrap())).is_err() {
             println!(
                 "Error: Something happened wrong (creating {}/.config)",
-                env!("HOME")
+                env::var("HOME").unwrap()
             )
         }
         if fs::write(&config_file, include_bytes!("default.config.json")).is_err() {
@@ -35,6 +40,11 @@ fn main() {
         "uptime",
         "cpu_type",
         "memory",
+        "theme",
+        "icon",
+        "font",
+        "cursor",
+        "desktop",
     ] {
         if let Some(Json::OBJECT { name, value }) = json.as_ref().unwrap().get(info) {
             let mut printing = "".to_string();
@@ -61,6 +71,11 @@ fn main() {
                             "uptime" => printingl[i] = infos.uptime.clone(),
                             "cpu_type" => printingl[i] = infos.cpu_type.clone(),
                             "memory" => printingl[i] = infos.memory.clone(),
+                            "theme" => printingl[i] = infos.theme_name.clone(),
+                            "icon" => printingl[i] = infos.icon_theme.clone(),
+                            "font" => printingl[i] = infos.font_name.clone(),
+                            "cursor" => printingl[i] = infos.cursor_theme.clone(),
+                            "desktop" => printingl[i] = infos.desktop.clone(),
                             _ => {}
                         }
                     }
@@ -82,7 +97,7 @@ fn main() {
 
                 match name.as_str() {
                     "banner" => {
-                        for j in 0..9 {
+                        for j in 0..14 {
                             let mut temp_string = String::new();
                             if (2..7).contains(&j) {
                                 if let Some(banner_line) = printing.lines().nth(j - 2) {
@@ -94,8 +109,16 @@ fn main() {
                             cache.push(temp_string);
                         }
                     }
-                    "uptime" | "cpu_type" | "user_a_host_name" | "memory" => {
-                        let padding = if name == "uptime" || name == "cpu_type" || name == "memory"
+                    "uptime" | "cpu_type" | "user_a_host_name" | "memory" | "theme" | "icon"
+                    | "font" | "cursor" | "desktop" => {
+                        let padding = if name == "uptime"
+                            || name == "cpu_type"
+                            || name == "memory"
+                            || name == "theme"
+                            || name == "icon"
+                            || name == "font"
+                            || name == "cursor"
+                            || name == "desktop"
                         {
                             0
                         } else {
@@ -105,6 +128,11 @@ fn main() {
                             "uptime" => 6,
                             "cpu_type" => 7,
                             "memory" => 8,
+                            "theme" => 9,
+                            "icon" => 10,
+                            "font" => 11,
+                            "cursor" => 12,
+                            "desktop" => 13,
                             _ => 1,
                         }) {
                             handle_spacing(cache_text, &printing, max_length, padding);

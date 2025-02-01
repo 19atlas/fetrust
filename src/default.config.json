@@ -2,11 +2,16 @@
 	"banner":			[["os"], "rand"],
 	"user_a_host_name":	[["          ","username","@","hostname","          "], "yellow"],
 	"brace":			[["____________________________________"], null],
-	"os":				[["os	==> ","os"," ","release"], null],
+	"os":				  [["OS	        ==> ","os"," ","release"], null],
 	"kernel":			[["Kernel	==> ","kernel_name"," ","kernel"], "green"],
 	"shell":			[["Shell	==> ","shell"], "purple"],
 	"family":			[["Family	==> ","family"], "cyan"],
-	"uptime":			[["Uptime	==> ","uptime"], null],
+	"uptime":			[["Uptime	==> ","uptime"], "rand"],
 	"cpu_type":		[["CPUt	==> ","cpu_type"], null],
-	"memory":			[["Memory	==> ","memory"], null]
+	"memory":			[["Memory	==> ","memory"], null],
+	"desktop":		[["DE	        ==> ","desktop"   ], null],
+	"theme":			[["Theme	==> ","theme" ], null],
+	"icon":			  [["Icons	==> ","icon"  ], null],
+	"font":			  [["Font	==> ","font"    ], null],
+	"cursor":			[["Cursor	==> ","cursor"], null]
 }

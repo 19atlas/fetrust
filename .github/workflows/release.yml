@@ -1,31 +1,44 @@
-name: Build fetrust
+name: Release Workflow
 
 on:
   push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      - 'Cargo.toml'
+      - 'src/**'
 
-permissions:
-      contents: write
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Cargo.toml'
+      - 'src/**'
 
 jobs:
-  build:
-    name: Build
+  release:
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@master
-      - name: Compile
-        id: compile
-        uses: rust-build/rust-build.action@v1.4.5
-        with:
-          RUSTTARGET: x86_64-unknown-linux-musl
-          UPLOAD_MODE: release
-      - name: Upload artifact
-        uses: AButler/upload-release-assets@v3.0
-        with:
-          files: "fetrust"
-          repo-token: ${{ secrets.GITHUB_TOKEN }}
-          release-tag: 0.1.6
 
-          
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies and build
+        run: |
+          cargo build --release
+
+      - name: Bump version if changed
+        id: version
+        run: |
+          # Assuming the version is in Cargo.toml, adjust if using package.json or others
+          current_version=$(grep -oP 'version\s*=\s*"\K[0-9\.]+' Cargo.toml)
+          echo "Current version: $current_version"
+          echo "version=$current_version" >> $GITHUB_ENV
+
+      - name: Upload build artifacts
+        if: steps.version.outputs.version != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: fetrust-${{ env.version }}  # Artifact name, can include version
+          path: target/release/fetrust  # Path to your compiled binary or other build artifacts
+         
