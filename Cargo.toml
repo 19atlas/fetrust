@@ -4,7 +4,7 @@ version = "0.1.5"
 edition = "2021"
 description = "fetchtool in rust"
 categories = ["os","fetching","system","device"]
-license = "GPL-3.0"
+license = "GPL-3.0 OR WTFPL"
 
 [profile.release]
 strip = true
