@@ -40,6 +40,7 @@ pub fn ini_parser(
     Ok(ini_data)
 }
 
+#[allow(dead_code)]
 pub fn ini_reader(file_path: &str, section: &str, field: &str) -> String {
     let ini_infos = ini_parser(file_path).unwrap();
 

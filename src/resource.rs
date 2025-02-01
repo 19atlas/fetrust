@@ -24,7 +24,17 @@ pub mod sys {
         process::Command,
     };
     pub fn init() -> SystemInfos {
+        #[cfg(target_os = "linux")]
         let themes = get_themes();
+
+        #[cfg(not(target_os = "linux"))]
+        let themes = Themes {
+            name: "N/A",
+            icon: "N/A",
+            font: "N/A",
+            cursor: "N/A",
+        };
+
         SystemInfos {
             os: get_os(),
             os_release: get_release(),
