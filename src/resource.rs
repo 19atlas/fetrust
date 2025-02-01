@@ -14,26 +14,19 @@ pub struct SystemInfos {
     pub icon_theme: String,
     pub font_name: String,
     pub cursor_theme: String,
+    pub desktop: String,
 }
 
 pub mod sys {
     use crate::{extra_fn::format_memory, resource::SystemInfos};
     use std::{
+        env,
         fs::File,
         io::{BufRead, BufReader},
         process::Command,
     };
     pub fn init() -> SystemInfos {
-        #[cfg(target_os = "linux")]
         let themes = get_themes();
-
-        #[cfg(not(target_os = "linux"))]
-        let themes = Themes {
-            name: "N/A",
-            icon: "N/A",
-            font: "N/A",
-            cursor: "N/A",
-        };
 
         SystemInfos {
             os: get_os(),
@@ -51,6 +44,7 @@ pub mod sys {
             icon_theme: themes.icon,
             font_name: themes.font,
             cursor_theme: themes.cursor,
+            desktop: get_desktop(),
         }
     }
 
@@ -513,11 +507,26 @@ pub mod sys {
         "ECPUI".to_string()
     }
 
+    #[cfg(not(target_os = "linux"))]
+    fn get_themes() -> Themes {
+        let na = String::from("N/A");
+        Themes {
+            name: na.clone(),
+            icon: na.clone(),
+            font: na.clone(),
+            cursor: na.clone(),
+        }
+    }
+
     #[cfg(target_os = "linux")]
     fn get_themes() -> Themes {
         use crate::ini_parser::ini_parser;
 
-        let ini = ini_parser(&format!("{}/.config/gtk-3.0/settings.ini", env!("HOME"))).unwrap();
+        let ini = ini_parser(&format!(
+            "{}/.config/gtk-3.0/settings.ini",
+            env::var("HOME").unwrap()
+        ))
+        .unwrap();
 
         let section = ini.get("Settings").unwrap();
         let theme_name = section.get("gtk-theme-name").unwrap();
@@ -531,5 +540,15 @@ pub mod sys {
             font: font_name.to_string(),
             cursor: cursor_theme.to_string(),
         }
+    }
+
+    #[cfg(not(target_os = "linux"))]
+    fn get_desktop() -> String {
+        String::from("N/A")
+    }
+
+    #[cfg(target_os = "linux")]
+    fn get_desktop() -> String {
+        env::var("XDG_CURRENT_DESKTOP").unwrap()
     }
 }

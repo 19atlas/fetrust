@@ -9,6 +9,7 @@
 	"uptime":			[["Uptime	==> ","uptime"], "rand"],
 	"cpu_type":		[["CPUt	==> ","cpu_type"], null],
 	"memory":			[["Memory	==> ","memory"], null],
+	"desktop":		[["DE	        ==> ","desktop"   ], null],
 	"theme":			[["Theme	==> ","theme" ], null],
 	"icon":			  [["Icons	==> ","icon"  ], null],
 	"font":			  [["Font	==> ","font"    ], null],

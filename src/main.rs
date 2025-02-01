@@ -4,20 +4,24 @@ mod resource;
 
 use another_json_minimal::*;
 use extra_fn::{apply_color, get_banner, handle_spacing};
-use std::fs;
 use std::path::Path;
+use std::{env, fs};
 
 fn main() {
     let mut cache: Vec<String> = Vec::new();
     let mut max_length = 0;
     let infos = crate::resource::sys::init();
-    let config_file = format!("{}/.config/fetrust/{}", env!("HOME"), "config.json");
+    let config_file = format!(
+        "{}/.config/fetrust/{}",
+        env::var("HOME").unwrap(),
+        "config.json"
+    );
     if !Path::new(&config_file).exists() {
         println!("Creating default config ({})", config_file);
-        if fs::create_dir_all(format!("{}/.config/fetrust", env!("HOME"))).is_err() {
+        if fs::create_dir_all(format!("{}/.config/fetrust", env::var("HOME").unwrap())).is_err() {
             println!(
                 "Error: Something happened wrong (creating {}/.config)",
-                env!("HOME")
+                env::var("HOME").unwrap()
             )
         }
         if fs::write(&config_file, include_bytes!("default.config.json")).is_err() {
@@ -40,6 +44,7 @@ fn main() {
         "icon",
         "font",
         "cursor",
+        "desktop",
     ] {
         if let Some(Json::OBJECT { name, value }) = json.as_ref().unwrap().get(info) {
             let mut printing = "".to_string();
@@ -70,6 +75,7 @@ fn main() {
                             "icon" => printingl[i] = infos.icon_theme.clone(),
                             "font" => printingl[i] = infos.font_name.clone(),
                             "cursor" => printingl[i] = infos.cursor_theme.clone(),
+                            "desktop" => printingl[i] = infos.desktop.clone(),
                             _ => {}
                         }
                     }
@@ -91,7 +97,7 @@ fn main() {
 
                 match name.as_str() {
                     "banner" => {
-                        for j in 0..13 {
+                        for j in 0..14 {
                             let mut temp_string = String::new();
                             if (2..7).contains(&j) {
                                 if let Some(banner_line) = printing.lines().nth(j - 2) {
@@ -104,7 +110,7 @@ fn main() {
                         }
                     }
                     "uptime" | "cpu_type" | "user_a_host_name" | "memory" | "theme" | "icon"
-                    | "font" | "cursor" => {
+                    | "font" | "cursor" | "desktop" => {
                         let padding = if name == "uptime"
                             || name == "cpu_type"
                             || name == "memory"
@@ -112,6 +118,7 @@ fn main() {
                             || name == "icon"
                             || name == "font"
                             || name == "cursor"
+                            || name == "desktop"
                         {
                             0
                         } else {
@@ -125,6 +132,7 @@ fn main() {
                             "icon" => 10,
                             "font" => 11,
                             "cursor" => 12,
+                            "desktop" => 13,
                             _ => 1,
                         }) {
                             handle_spacing(cache_text, &printing, max_length, padding);
