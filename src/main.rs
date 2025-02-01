@@ -1,4 +1,5 @@
 mod extra_fn;
+mod ini_parser;
 mod resource;
 
 use another_json_minimal::*;
