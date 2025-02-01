@@ -5,8 +5,15 @@ on:
     branches:
       - main
     paths:
-      - 'Cargo.toml'  # Adjust this if your versioning is in another file
-      - 'src/**'  # Adjust according to your source files to detect code changes
+      - 'Cargo.toml'
+      - 'src/**'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Cargo.toml'
+      - 'src/**'
 
 jobs:
   release:
