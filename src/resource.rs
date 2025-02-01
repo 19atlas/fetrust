@@ -331,53 +331,46 @@ pub mod sys {
             .expect("1")
     }
     #[cfg(not(target_os = "windows"))]
-    pub fn get_uptime() -> String {
-        /*let up_time = match up_time {
-            Ok(x) => {
-                let time = String::from_utf8(x.stdout)
-                    .unwrap()
-                    /*.replace("hour(s)", "saat")
-                    .replace("minute(s)", "dakkikadir") //turkish moment from creyde.sh
-                    .replace("day(s)", "gün")
-                    .replace("up ", "")*/;
-                time
-            }
-            Err(_) => "Can't get data.".to_string(),
-        };*/
-
+    fn get_uptime() -> String {
         use std::fs;
-        let path = "/proc/uptime";
 
-        let contents = match fs::read_to_string(path) {
-            Ok(content) => content,
-            Err(_) => return "Error: Could not read /proc/uptime".to_string(),
-        };
+        #[allow(unused_imports)]
+        use crate::extra_fn::{format_uptime, get_elapsed_seconds_since, parse_sysctl_boottime};
 
-        let parts: Vec<&str> = contents.split_whitespace().collect();
-
-        if let Some(uptime_str) = parts.first() {
-            if let Ok(uptime) = uptime_str.parse::<f64>() {
-                let days = (uptime / 86400.0).floor() as u64;
-                let hours = ((uptime % 86400.0) / 3600.0).floor() as u64;
-                let minutes = ((uptime % 3600.0) / 60.0).floor() as u64;
-                let seconds = (uptime % 60.0).floor() as u64;
-
-                if days > 0 {
-                    return format!(
-                        "{} days, {} hours, {} minutes, {} seconds",
-                        days, hours, minutes, seconds
-                    );
-                } else if hours > 0 {
-                    return format!("{} hours, {} minutes, {} seconds", hours, minutes, seconds);
-                } else if minutes > 0 {
-                    return format!("{} minutes, {} seconds", minutes, seconds);
-                } else {
-                    return format!("{} seconds", seconds);
+        #[cfg(target_os = "linux")]
+        {
+            if let Ok(contents) = fs::read_to_string("/proc/uptime") {
+                let parts: Vec<&str> = contents.split_whitespace().collect();
+                if let Some(uptime_str) = parts.first() {
+                    if let Ok(uptime) = uptime_str.parse::<f64>() {
+                        return format_uptime(uptime);
+                    }
                 }
             }
+            "EUPTM".to_string()
         }
 
-        "Error: No data".to_string()
+        #[cfg(any(
+            target_os = "macos",
+            target_os = "freebsd",
+            target_os = "openbsd",
+            target_os = "netbsd"
+        ))]
+        {
+            if let Ok(output) = Command::new("sysctl")
+                .arg("-n")
+                .arg("kern.boottime")
+                .output()
+            {
+                if let Ok(output_str) = String::from_utf8(output.stdout) {
+                    if let Some(boot_time) = parse_sysctl_boottime(&output_str) {
+                        let uptime = get_elapsed_seconds_since(boot_time);
+                        return format_uptime(uptime);
+                    }
+                }
+            }
+            "EUPTM".to_string()
+        }
     }
 
     pub fn get_kernel_name() -> String {

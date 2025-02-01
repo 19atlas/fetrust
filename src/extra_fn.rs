@@ -86,3 +86,43 @@ pub fn format_memory(total: f64, used: f64) -> String {
         )
     }
 }
+
+pub fn format_uptime(uptime: f64) -> String {
+    let days = (uptime / 86400.0).floor() as u64;
+    let hours = ((uptime % 86400.0) / 3600.0).floor() as u64;
+    let minutes = ((uptime % 3600.0) / 60.0).floor() as u64;
+    let seconds = (uptime % 60.0).floor() as u64;
+
+    if days > 0 {
+        format!(
+            "{} days, {} hours, {} minutes, {} seconds",
+            days, hours, minutes, seconds
+        )
+    } else if hours > 0 {
+        format!("{} hours, {} minutes, {} seconds", hours, minutes, seconds)
+    } else if minutes > 0 {
+        format!("{} minutes, {} seconds", minutes, seconds)
+    } else {
+        format!("{} seconds", seconds)
+    }
+}
+
+#[allow(dead_code)]
+pub fn parse_sysctl_boottime(output: &str) -> Option<i64> {
+    let parts: Vec<&str> = output.split(',').collect();
+    if !parts.is_empty() {
+        if let Some(sec_part) = parts[0].split('=').nth(1) {
+            return sec_part.trim().parse::<i64>().ok();
+        }
+    }
+    None
+}
+
+#[allow(dead_code)]
+pub fn get_elapsed_seconds_since(boot_time: i64) -> f64 {
+    let now = std::time::SystemTime::now();
+    if let Ok(duration_since_boot) = now.duration_since(std::time::UNIX_EPOCH) {
+        return duration_since_boot.as_secs() as f64 - boot_time as f64;
+    }
+    0.0
+}
