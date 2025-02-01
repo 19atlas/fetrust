@@ -344,10 +344,40 @@ pub mod sys {
             }
             Err(_) => "Can't get data.".to_string(),
         };*/
-        let up_time = cuptime_parser::command_uptime_parser();
-        // gereksiz \n leri siler //turkish moment from creyde.sh
 
-        up_time.replace('\n', "")
+        use std::fs;
+        let path = "/proc/uptime";
+
+        let contents = match fs::read_to_string(path) {
+            Ok(content) => content,
+            Err(_) => return "Error: Could not read /proc/uptime".to_string(),
+        };
+
+        let parts: Vec<&str> = contents.split_whitespace().collect();
+
+        if let Some(uptime_str) = parts.first() {
+            if let Ok(uptime) = uptime_str.parse::<f64>() {
+                let days = (uptime / 86400.0).floor() as u64;
+                let hours = ((uptime % 86400.0) / 3600.0).floor() as u64;
+                let minutes = ((uptime % 3600.0) / 60.0).floor() as u64;
+                let seconds = (uptime % 60.0).floor() as u64;
+
+                if days > 0 {
+                    return format!(
+                        "{} days, {} hours, {} minutes, {} seconds",
+                        days, hours, minutes, seconds
+                    );
+                } else if hours > 0 {
+                    return format!("{} hours, {} minutes, {} seconds", hours, minutes, seconds);
+                } else if minutes > 0 {
+                    return format!("{} minutes, {} seconds", minutes, seconds);
+                } else {
+                    return format!("{} seconds", seconds);
+                }
+            }
+        }
+
+        "Error: No data".to_string()
     }
 
     pub fn get_kernel_name() -> String {
