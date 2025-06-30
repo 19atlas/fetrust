@@ -1,10 +1,7 @@
 # fetrust
 a minimal and fast system info program
 
-
-![resim](https://github.com/user-attachments/assets/7088bef4-fe6e-4a3a-ba9b-0faeefd98932)
-
-
+![resim](https://github.com/user-attachments/assets/2dbc72b9-8983-4432-87a9-309af7cdd15f)
 <br>
 
 ## Just
