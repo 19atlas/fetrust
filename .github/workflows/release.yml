@@ -5,22 +5,28 @@ on:
     types: [published]
 
 jobs:
-  build:
+  test:
+    name: cargo test
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+      - run: cargo build --release
 
-    - name: Set up Rust
-      uses: actions/setup-rust@v1
-      with:
-        rust-version: nightly
+  # Check formatting with rustfmt
+  formatting:
+    name: cargo fmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Ensure rustfmt is installed and setup problem matcher
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          components: rustfmt
+      - name: Rustfmt Check
+        uses: actions-rust-lang/rustfmt@v1
 
-    - name: Build with cargo
-      run: cargo build --release
-
-    - name: Upload release asset
+      - name: Upload release asset
       uses: softprops/action-gh-release@v2
       with:
         files: target/release/fetrust
