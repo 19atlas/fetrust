@@ -1,36 +1,28 @@
-name: Release Workflow
+name: Build and Release Rust Binary
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'Cargo.toml'
-      - 'src/**'
-
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'Cargo.toml'
-      - 'src/**'
+  release:
+    types: [published]
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
 
-      - name: Install dependencies and build
-        run: |
-          cargo build --release
-
-      - uses: "marvinpinto/action-automatic-releases@latest"
+    - name: Set up Rust
+      uses: actions/setup-rust@v1
       with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "latest"
-          prerelease: false
-          title: "Binary Release"
-          files: target/release/fetrust
+        rust-version: nightly
+
+    - name: Build with cargo
+      run: cargo build --release
+
+    - name: Upload release asset
+      uses: softprops/action-gh-release@v2
+      with:
+        files: target/release/fetrust
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
