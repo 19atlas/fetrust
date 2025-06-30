@@ -8,6 +8,7 @@ pub struct SystemInfos {
     pub shell: String,
     pub family: String,
     pub uptime: String,
+    pub resolution: String,
     pub cpu_type: String,
     pub memory: String,
     pub theme_name: String,
@@ -38,6 +39,7 @@ pub mod sys {
             shell: get_shell(),
             family: get_family(),
             uptime: get_uptime(),
+            resolution: get_res(),
             cpu_type: get_cput(),
             memory: get_memory(),
             theme_name: themes.name,
@@ -393,6 +395,23 @@ pub mod sys {
             }
             "EUPTM".to_string()
         }
+    }
+    #[cfg(target_os = "linux")]
+    pub fn get_res() -> String {
+        let output = Command::new("xrandr")
+            .output()
+            .expect("xrandr error");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+
+        // Parse the output to find the current resolution (look for a line like "   1920x1080     60.00*+")
+        for line in stdout.lines() {
+            if line.contains("*") {
+                if let Some(res) = line.split_whitespace().next() {
+                    return res.to_string();
+                }
+            }
+        }
+        "Unknown".to_string()
     }
 
     pub fn get_kernel_name() -> String {

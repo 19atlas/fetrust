@@ -38,6 +38,7 @@ fn main() {
         "shell",
         "family",
         "uptime",
+        "resolution",
         "cpu_type",
         "memory",
         "theme",
@@ -69,6 +70,7 @@ fn main() {
                             "shell" => printingl[i] = infos.shell.clone(),
                             "family" => printingl[i] = infos.family.clone(),
                             "uptime" => printingl[i] = infos.uptime.clone(),
+                            "resolution" => printingl[i] = infos.resolution.clone(),
                             "cpu_type" => printingl[i] = infos.cpu_type.clone(),
                             "memory" => printingl[i] = infos.memory.clone(),
                             "theme" => printingl[i] = infos.theme_name.clone(),
@@ -97,7 +99,7 @@ fn main() {
 
                 match name.as_str() {
                     "banner" => {
-                        for j in 0..14 {
+                        for j in 0..15 {
                             let mut temp_string = String::new();
                             if (2..7).contains(&j) {
                                 if let Some(banner_line) = printing.lines().nth(j - 2) {
@@ -110,7 +112,7 @@ fn main() {
                         }
                     }
                     "uptime" | "cpu_type" | "user_a_host_name" | "memory" | "theme" | "icon"
-                    | "font" | "cursor" | "desktop" => {
+                    | "font" | "cursor" | "desktop" | "resolution" => {
                         let padding = if name == "uptime"
                             || name == "cpu_type"
                             || name == "memory"
@@ -119,6 +121,7 @@ fn main() {
                             || name == "font"
                             || name == "cursor"
                             || name == "desktop"
+                            || name == "resolution"
                         {
                             0
                         } else {
@@ -133,6 +136,7 @@ fn main() {
                             "font" => 11,
                             "cursor" => 12,
                             "desktop" => 13,
+                            "resolution" => 14,
                             _ => 1,
                         }) {
                             handle_spacing(cache_text, &printing, max_length, padding);
